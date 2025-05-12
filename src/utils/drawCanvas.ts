@@ -25,7 +25,7 @@ export const drawCanvas = (
 
     // キャンバスのサイズを調整
     const canvas = ctx.canvas;
-    if (screenAspectRatio > videoAspectRatio) {
+    if (screenAspectRatio < 1) {
         // 横幅が広い場合（縦持ち）
         canvas.height = screenHeight;
         canvas.width = screenHeight * videoAspectRatio;
