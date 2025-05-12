@@ -51,12 +51,6 @@ const HandsTest:React.FC = () => {
 		}
 	}, [onResults])
 
-	/** 検出結果をconsoleに出力する */
-	const OutputData = () => {
-		const results = resultsRef.current as Results
-		console.log(results.multiHandLandmarks)
-	}
-
 	const videoConstraints = {
 		width: window.innerWidth,
 		height: window.innerHeight,
@@ -77,12 +71,6 @@ const HandsTest:React.FC = () => {
 			/>
 			{/* draw */}
 			<canvas ref={canvasRef} className={styles.canvas} />
-			{/* output */}
-			<div className={styles.buttonContainer}>
-				<button className={styles.button} onClick={OutputData}>
-					Output Data
-				</button>
-			</div>
 		</div>
 	)
 }

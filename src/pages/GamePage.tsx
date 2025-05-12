@@ -10,7 +10,7 @@ const GamePage: React.FC = () => {
   const [timeLeft/*, setTimeLeft*/] = useState(30); // 30 seconds to catch the train
   
   const handleRun = () => {
-    setProgress(prev => Math.min(100, prev + 5));
+    setProgress(prev => Math.min(200, prev + 5));
   };
   
   return (
@@ -46,34 +46,33 @@ const GamePage: React.FC = () => {
         {/* Main game area */}
         <div className="flex-1 flex flex-col items-center justify-center p-4 z-10">
           {/* Platform and train visualization */}
-          <div className="bg-gray-100 rounded-xl w-full max-w-md p-6 border-4 border-gray-300">
+          <div className="bg-gray-100 rounded-xl w-full max-w-4xl p-6 border-4 border-gray-300" style={{ width: '70%' }}>
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">駅まで急げ！</h2>
               <p className="text-gray-600">あと{Math.max(0, 200 - progress)}メートル</p>
             </div>
             
             {/* Progress meter */}
             <div className="mb-8">
               <div className="flex items-center mb-2">
-                <Running size={20} className="mr-2 text-green-500" />
-                <span className="font-medium text-gray-700">ホームまでの距離</span>
+          <Running size={20} className="mr-2 text-green-500" />
+          <span className="font-medium text-gray-700">ホームまでの距離</span>
               </div>
               <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-green-500 transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                ></div>
+          <div 
+            className="h-full bg-green-500 transition-all duration-300"
+            style={{ width: `${progress/2}%` }}
+          ></div>
               </div>
             </div>
             
             {/* Game interaction area */}
             <div className="flex justify-center">
-              <button 
-                className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-full text-xl transition-transform transform hover:scale-105 active:scale-95 focus:outline-none"
-                onClick={handleRun}
-              >
-                走る！
-              </button>
+                <button 
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-8 rounded-full text-xl transition-transform transform hover:scale-105 active:scale-95 focus:outline-none"
+              onClick={handleRun}
+                >
+              走る！
+                </button>
             </div>
           </div>
         </div>
