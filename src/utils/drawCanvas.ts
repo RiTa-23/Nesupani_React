@@ -16,8 +16,8 @@ export const drawCanvas = (
     videoHeight: number
 ) => {
     // 画面の縦横比を取得
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
+    const screenWidth = window.innerHeight;
+    const screenHeight = window.innerWidth;
     const screenAspectRatio = screenWidth / screenHeight;
 
     // Webカメラのアスペクト比を計算
@@ -27,8 +27,8 @@ export const drawCanvas = (
     const canvas = ctx.canvas;
     if (screenAspectRatio > videoAspectRatio) {
         // 横幅が広い場合（縦持ち）
-        canvas.height = screenWidth;
-        canvas.width = screenWidth / videoAspectRatio;
+        canvas.height = screenHeight;
+        canvas.width = screenHeight * videoAspectRatio;
     } else {
         // 縦幅が広い場合（横持ち）
         canvas.width = screenWidth;
