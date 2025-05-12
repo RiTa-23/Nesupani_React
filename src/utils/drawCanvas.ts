@@ -15,10 +15,25 @@ export const drawCanvas = (
     videoWidth: number,
     videoHeight: number
 ) => {
-    // キャンバスのサイズを画面に合わせて設定
+    // 画面の縦横比を取得
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const screenAspectRatio = screenWidth / screenHeight;
+
+    // Webカメラのアスペクト比を計算
+    const videoAspectRatio = videoWidth / videoHeight;
+
+    // キャンバスのサイズを調整
     const canvas = ctx.canvas;
-    canvas.width = window.innerWidth; // 画面幅に合わせる
-    canvas.height = (videoHeight / videoWidth) * window.innerWidth; // アスペクト比を維持
+    if (screenAspectRatio > videoAspectRatio) {
+        // 横幅が広い場合（縦持ち）
+        canvas.height = screenHeight;
+        canvas.width = screenHeight * videoAspectRatio;
+    } else {
+        // 縦幅が広い場合（横持ち）
+        canvas.width = screenWidth;
+        canvas.height = screenWidth / videoAspectRatio;
+    }
 
     const width = canvas.width;
     const height = canvas.height;
