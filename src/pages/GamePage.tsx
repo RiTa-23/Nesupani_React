@@ -10,7 +10,7 @@ const GamePage: React.FC = () => {
   const [timeLeft/*, setTimeLeft*/] = useState(30); // 30 seconds to catch the train
   
   const handleRun = () => {
-    setProgress(prev => Math.min(100, prev + 5));
+    setProgress(prev => Math.min(200, prev + 5));
   };
   
   return (
@@ -61,7 +61,7 @@ const GamePage: React.FC = () => {
               <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-green-500 transition-all duration-300"
-                  style={{ width: `${progress}%` }}
+                  style={{ width: `${progress/2}%` }}
                 ></div>
               </div>
             </div>
