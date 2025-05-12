@@ -27,8 +27,8 @@ export const drawCanvas = (
     const canvas = ctx.canvas;
     if (screenAspectRatio > videoAspectRatio) {
         // 横幅が広い場合（縦持ち）
-        canvas.height = screenHeight;
-        canvas.width = screenHeight * videoAspectRatio;
+        canvas.height = screenWidth;
+        canvas.width = screenWidth / videoAspectRatio;
     } else {
         // 縦幅が広い場合（横持ち）
         canvas.width = screenWidth;
