@@ -19,7 +19,7 @@ const HandsTest:React.FC = () => {
 		resultsRef.current = results
 
 		const canvasCtx = canvasRef.current!.getContext('2d')!
-		drawCanvas(canvasCtx, results)
+		drawCanvas(canvasCtx, results, webcamRef.current!.video!.videoWidth, webcamRef.current!.video!.videoHeight)
 	}, [])
 
 	// 初期設定
