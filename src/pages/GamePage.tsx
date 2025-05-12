@@ -7,7 +7,7 @@ import PageTransition from '../components/PageTransition';
 const GamePage: React.FC = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30); // 30 seconds to catch the train
+  const [timeLeft/*, setTimeLeft*/] = useState(30); // 30 seconds to catch the train
   
   const handleRun = () => {
     setProgress(prev => Math.min(100, prev + 5));
