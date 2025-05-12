@@ -58,8 +58,8 @@ const HandsTest:React.FC = () => {
 	}
 
 	const videoConstraints = {
-		width: 1280,
-		height: 720,
+		width: window.innerWidth,
+		height: window.innerHeight,
 		facingMode: 'user'
 	}
 
@@ -104,8 +104,8 @@ const styles = {
 	`,
 	canvas: css`
 		position: absolute;
-		width: 1280px;
-		height: 720px;
+		width: 100%;
+		height: 100%;
 		background-color: #fff;
 	`,
 	buttonContainer: css`
