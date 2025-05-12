@@ -51,30 +51,35 @@ export const drawCanvas = (
             drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
             drawLandmarks(ctx, landmarks, { color: '#FF0000', lineWidth: 2, radius: 3 });
         }
-        drawCircle(ctx, results.multiHandLandmarks);
+        drawLine(ctx, results.multiHandLandmarks);
     }
     ctx.restore();
 };
 
 /**
- * 人差し指の先端と人差し指の先端の間に円を描く
+ * 左右の手首の間に垂直方向の線を描く（画面の中心）
  * @param ctx
  * @param handLandmarks
  */
-const drawCircle = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandmarkListList) => {
+const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandmarkListList) => {
     if (handLandmarks.length === 2 && handLandmarks[0].length > 8 && handLandmarks[1].length > 8) {
         const width = ctx.canvas.width;
         const height = ctx.canvas.height;
-        const [x1, y1] = [handLandmarks[0][8].x * width, handLandmarks[0][8].y * height];
-        const [x2, y2] = [handLandmarks[1][8].x * width, handLandmarks[1][8].y * height];
-        const x = (x1 + x2) / 2;
+
+        const y1 = handLandmarks[0][8].y * height;
+        const y2 = handLandmarks[1][8].y * height;
+        console.log('y1:', y1, 'y2:', y2);
         const y = (y1 + y2) / 2;
-        const r = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)) / 2;
+
+        // 画面の中心からのズレ
+        const ydiff=height/2-y;
+
 
         ctx.strokeStyle = '#0082cf';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2, true);
+        ctx.moveTo(width/2, y1+ydiff);
+        ctx.lineTo(width/2, y2+ydiff);
         ctx.stroke();
     }
 };
