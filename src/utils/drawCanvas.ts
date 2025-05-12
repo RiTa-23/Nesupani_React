@@ -69,17 +69,21 @@ const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandma
         const y1 = handLandmarks[0][8].y * height;
         const y2 = handLandmarks[1][8].y * height;
         console.log('y1:', y1, 'y2:', y2);
+        
+        // 画面の中心からのズレを計算
         const y = (y1 + y2) / 2;
+        const ygap=height/2-y;
 
-        // 画面の中心からのズレ
-        const ydiff=height/2-y;
+        // y1とy2の差を計算
+        const diff = Math.abs(y1 - y2);
+        console.log('diff:', diff);
 
 
         ctx.strokeStyle = '#0082cf';
-        ctx.lineWidth = 5;
+        ctx.lineWidth = 10;
         ctx.beginPath();
-        ctx.moveTo(width/2, y1+ydiff);
-        ctx.lineTo(width/2, y2+ydiff);
+        ctx.moveTo(width/2, y1+ygap);
+        ctx.lineTo(width/2, y2+ygap);
         ctx.stroke();
     }
 };
