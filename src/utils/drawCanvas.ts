@@ -91,7 +91,7 @@ const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandma
             ctx.strokeStyle = '#00FF62FF';
             setIsHandSwinging(true);
         }
-        else if(diff < 100){
+        else if(diff < 150){
             ctx.strokeStyle = '#FF0000FF';
             setIsHandSwinging(false);
         }
