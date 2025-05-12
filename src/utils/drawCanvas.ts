@@ -13,7 +13,8 @@ export const drawCanvas = (
     ctx: CanvasRenderingContext2D,
     results: Results,
     videoWidth: number,
-    videoHeight: number
+    videoHeight: number,
+    setIsHandSwinging: (isHandSwinging: boolean) => void
 ) => {
     // 画面の縦横比を取得
     const screenWidth = window.innerWidth;
@@ -41,6 +42,10 @@ export const drawCanvas = (
     ctx.save();
     ctx.clearRect(0, 0, width, height);
 
+    if (results.multiHandLandmarks) {
+        drawLine(ctx, results.multiHandLandmarks, setIsHandSwinging); // 状態更新用のコールバックを渡す
+      }
+
     // canvas の左右反転
     ctx.scale(-1, 1);
     ctx.translate(-width, 0);
@@ -51,7 +56,7 @@ export const drawCanvas = (
             drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
             drawLandmarks(ctx, landmarks, { color: '#FF0000', lineWidth: 2, radius: 3 });
         }
-        drawLine(ctx, results.multiHandLandmarks);
+        drawLine(ctx, results.multiHandLandmarks,setIsHandSwinging); // 状態更新用のコールバックを渡す
     }
     ctx.restore();
 };
@@ -61,7 +66,9 @@ export const drawCanvas = (
  * @param ctx
  * @param handLandmarks
  */
-const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandmarkListList) => {
+const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandmarkListList,
+    setIsHandSwinging: (isHandSwinging: boolean) => void
+) => {
     if (handLandmarks.length === 2 && handLandmarks[0].length > 8 && handLandmarks[1].length > 8) {
         const width = ctx.canvas.width;
         const height = ctx.canvas.height;
@@ -82,9 +89,11 @@ const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandma
         
         if(diff > 200) {
             ctx.strokeStyle = '#00FF62FF';
+            setIsHandSwinging(true);
         }
         else if(diff < 50){
             ctx.strokeStyle = '#FF0000FF';
+            setIsHandSwinging(false);
         }
         else{
             ctx.strokeStyle = '#0082cf';

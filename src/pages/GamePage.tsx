@@ -13,6 +13,8 @@ const GamePage: React.FC = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [timeLeft] = useState(30); // 30 seconds to catch the train
+  const [isHandSwinging, setIsHandSwinging] = useState(false); // 手の振り具合を管理
+  const prevIsHandSwinging = useRef(isHandSwinging); // 前回の状態を追跡
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,7 +29,13 @@ const GamePage: React.FC = () => {
    */
   const onResults = useCallback((results: Results) => {
     const canvasCtx = canvasRef.current!.getContext('2d')!;
-    drawCanvas(canvasCtx, results, webcamRef.current!.video!.videoWidth, webcamRef.current!.video!.videoHeight);
+    drawCanvas(
+      canvasCtx,
+      results,
+      webcamRef.current!.video!.videoWidth,
+      webcamRef.current!.video!.videoHeight,
+      setIsHandSwinging // 状態更新用の関数を渡す
+    );
   }, []);
 
   // 初期設定
@@ -56,6 +64,15 @@ const GamePage: React.FC = () => {
       camera.start();
     }
   }, [onResults]);
+
+  // 手の振り具合が「小さい」から「大きい」に変化したときの処理
+  useEffect(() => {
+    if (!prevIsHandSwinging.current && isHandSwinging) {
+      console.log('手の振り具合が小さいから大きいに変化しました！');
+      handleRun(); // 腕を振ることで走る処理を実行
+    }
+    prevIsHandSwinging.current = isHandSwinging; // 前回の状態を更新
+  }, [isHandSwinging]);
 
   return (
     <PageTransition>
@@ -100,9 +117,9 @@ const GamePage: React.FC = () => {
               ref={webcamRef}
               screenshotFormat="image/jpeg"
               videoConstraints={{
-          width: window.innerWidth,
-          height: window.innerHeight,
-          facingMode: 'user'
+                width: window.innerWidth,
+                height: window.innerHeight,
+                facingMode: 'user'
               }}
             />
             <canvas ref={canvasRef} className="absolute w-full h-full" />
@@ -129,7 +146,8 @@ const GamePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Game interaction area */}
+          {/* デバッグ用 */}
+          <div>手の振り具合: {isHandSwinging ? '大きい' : '小さい'}</div>
           <div className="flex justify-center">
             <button
               className="bg-green-500 hover:bg-green-600 text-white font-bold py-0 px-8 rounded-full text-xl transition-transform transform hover:scale-105 active:scale-95 focus:outline-none"
