@@ -44,9 +44,9 @@ const GamePage: React.FC = () => {
         </div>
         
         {/* Main game area */}
-        <div className="flex-1 flex flex-col items-center justify-center p-4 z-10">
+        <div className="flex-1 flex flex-col items-center justify-end p-4 z-10">
           {/* Platform and train visualization */}
-          <div className="bg-gray-100 rounded-xl w-full max-w-4xl p-6 border-4 border-gray-300" style={{ width: '70%' }}>
+          <div className="bg-gray-100 rounded-xl w-full max-w-10xl p-6 border-4 border-gray-300" style={{ width: '100%' }}>
             <div className="text-center mb-6">
               <p className="text-gray-600">あと{Math.max(0, 200 - progress)}メートル</p>
             </div>
@@ -67,12 +67,12 @@ const GamePage: React.FC = () => {
             
             {/* Game interaction area */}
             <div className="flex justify-center">
-                <button 
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-8 rounded-full text-xl transition-transform transform hover:scale-105 active:scale-95 focus:outline-none"
+          <button 
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-0 px-8 rounded-full text-xl transition-transform transform hover:scale-105 active:scale-95 focus:outline-none"
               onClick={handleRun}
-                >
+          >
               走る！
-                </button>
+          </button>
             </div>
           </div>
         </div>
