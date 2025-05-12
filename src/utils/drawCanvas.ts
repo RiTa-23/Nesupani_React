@@ -79,7 +79,17 @@ const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandma
         console.log('diff:', diff);
 
 
-        ctx.strokeStyle = '#0082cf';
+        
+        if(diff > 300) {
+            ctx.strokeStyle = '#00FF62FF';
+        }
+        else if(diff < 50){
+            ctx.strokeStyle = '#FF0000FF';
+        }
+        else{
+            ctx.strokeStyle = '#0082cf';
+        }
+
         ctx.lineWidth = 10;
         ctx.beginPath();
         ctx.moveTo(width/2, y1+ygap);

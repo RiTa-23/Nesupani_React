@@ -82,7 +82,7 @@ const GamePage: React.FC = () => {
             </div>
             <div className="flex items-center text-white">
               <MapPin size={18} className="mr-1" />
-              <span>久留米駅</span>
+              <span>目的地：基山駅</span>
             </div>
           </div>
         </div>
