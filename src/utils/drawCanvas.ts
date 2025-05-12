@@ -80,7 +80,7 @@ const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandma
 
 
         
-        if(diff > 300) {
+        if(diff > 200) {
             ctx.strokeStyle = '#00FF62FF';
         }
         else if(diff < 50){
