@@ -10,6 +10,7 @@ import Button from '../components/Button';
 import PageTransition from '../components/PageTransition';
 
 const GamePage: React.FC = () => {
+  const goalDistance = 500; // ゴールまでの距離
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30); // 制限時間を30秒に設定
@@ -20,7 +21,7 @@ const GamePage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleRun = () => {
-    setProgress(prev => Math.min(200, prev + 5));
+    setProgress(prev => Math.min(goalDistance, prev + 5));
   };
 
   /**
@@ -143,7 +144,7 @@ const GamePage: React.FC = () => {
         {/* Progress bar */}
         <div className="bg-gray-100 rounded-xl w-full max-w-10xl p-6 border-4 border-gray-300" style={{ width: '100%' }}>
           <div className="text-center mb-6">
-            <p className="text-gray-600">あと{Math.max(0, 200 - progress)}メートル</p>
+            <p className="text-gray-600">あと{Math.max(0, goalDistance - progress)}メートル</p>
           </div>
 
           {/* Progress meter */}
@@ -155,7 +156,7 @@ const GamePage: React.FC = () => {
             <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-green-500 transition-all duration-300"
-                style={{ width: `${progress / 2}%` }}
+                style={{ width: `${progress / goalDistance *100}%` }}
               ></div>
             </div>
           </div>
@@ -173,6 +174,7 @@ const GamePage: React.FC = () => {
 
         </div>
       </div>
+      
     </PageTransition>
   );
 };
