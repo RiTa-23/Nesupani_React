@@ -89,6 +89,13 @@ const GamePage: React.FC = () => {
     return () => clearInterval(timer); // クリーンアップ
   }, [timeLeft, navigate]);
 
+  // ゴールに到達したらクリア画面に遷移
+  useEffect(() => {
+    if (progress >= goalDistance) {
+      navigate('/gameclear'); // ゴールに到達したらゲームクリア画面に遷移
+    }
+  }, [progress, goalDistance, navigate]);
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-gray-900 flex flex-col relative">
@@ -156,7 +163,7 @@ const GamePage: React.FC = () => {
             <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-green-500 transition-all duration-300"
-                style={{ width: `${progress / goalDistance *100}%` }}
+                style={{ width: `${(progress / goalDistance) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -174,7 +181,6 @@ const GamePage: React.FC = () => {
 
         </div>
       </div>
-      
     </PageTransition>
   );
 };
