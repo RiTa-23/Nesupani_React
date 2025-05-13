@@ -13,7 +13,7 @@ const GamePage: React.FC = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [timeLeft] = useState(30); // 30 seconds to catch the train
-  const [isHandSwinging, setIsHandSwinging] = useState(false); // 手の振り具合を管理
+  const [isHandSwinging, setIsHandSwinging] = useState(true); // 手の振り具合を管理
   const prevIsHandSwinging = useRef(isHandSwinging); // 前回の状態を追跡
 
   const webcamRef = useRef<Webcam>(null);
@@ -147,7 +147,7 @@ const GamePage: React.FC = () => {
           </div>
 
           {/* デバッグ用 */}
-          <div>手の振り具合: {isHandSwinging ? '大きい' : '小さい'}</div>
+          {/* <div>手の振り具合: {isHandSwinging ? '大きい' : '小さい'}</div>
           <div className="flex justify-center">
             <button
               className="bg-green-500 hover:bg-green-600 text-white font-bold py-0 px-8 rounded-full text-xl transition-transform transform hover:scale-105 active:scale-95 focus:outline-none"
@@ -155,7 +155,8 @@ const GamePage: React.FC = () => {
             >
               走る！
             </button>
-          </div>
+          </div> */}
+
         </div>
       </div>
     </PageTransition>
