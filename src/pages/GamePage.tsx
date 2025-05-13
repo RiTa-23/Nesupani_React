@@ -12,7 +12,7 @@ import PageTransition from '../components/PageTransition';
 const GamePage: React.FC = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
-  const [timeLeft] = useState(30); // 30 seconds to catch the train
+  const [timeLeft, setTimeLeft] = useState(30); // 制限時間を30秒に設定
   const [isHandSwinging, setIsHandSwinging] = useState(true); // 手の振り具合を管理
   const prevIsHandSwinging = useRef(isHandSwinging); // 前回の状態を追跡
 
@@ -73,6 +73,20 @@ const GamePage: React.FC = () => {
     }
     prevIsHandSwinging.current = isHandSwinging; // 前回の状態を更新
   }, [isHandSwinging]);
+
+  // 制限時間のカウントダウン
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      navigate('/gameover'); // 制限時間が0になったらゲームオーバー画面に遷移
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer); // クリーンアップ
+  }, [timeLeft, navigate]);
 
   return (
     <PageTransition>
