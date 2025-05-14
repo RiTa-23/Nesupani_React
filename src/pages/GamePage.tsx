@@ -11,14 +11,13 @@ import PageTransition from '../components/PageTransition';
 import useSound from 'use-sound';
 
 const GamePage: React.FC = () => {
-  // 音声ファイルのインポート
   const [stepSound] = useSound('/sounds/step.mp3', { volume: 0.5 });
-
   const goalDistance = 500; // ゴールまでの距離
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30); // 制限時間を30秒に設定
-  const [isHandSwinging, setIsHandSwinging] = useState(true); // 手の振り具合を管理
+  const [isHandSwinging, setIsHandSwinging] = useState(false); // 手の振り具合を管理
+  const [isGameStarted, setIsGameStarted] = useState(false); // ゲームがスタートしたかどうかを管理
   const prevIsHandSwinging = useRef(isHandSwinging); // 前回の状態を追跡
 
   const webcamRef = useRef<Webcam>(null);
@@ -26,9 +25,7 @@ const GamePage: React.FC = () => {
 
   const handleRun = () => {
     stepSound(); // 足音の音を再生
-    console.log('走る！');
     setProgress(prev => Math.min(goalDistance, prev + 5));
-
   };
 
   /**
@@ -44,7 +41,12 @@ const GamePage: React.FC = () => {
       webcamRef.current!.video!.videoHeight,
       setIsHandSwinging // 状態更新用の関数を渡す
     );
-  }, []);
+
+    // 手が画面前に構えられているかを判定
+    if (!isGameStarted && results.multiHandLandmarks?.length > 0) {
+      setIsGameStarted(true); // ゲームをスタート
+    }
+  }, [isGameStarted]);
 
   // 初期設定
   useEffect(() => {
@@ -76,7 +78,6 @@ const GamePage: React.FC = () => {
   // 手の振り具合が「小さい」から「大きい」に変化したときの処理
   useEffect(() => {
     if (!prevIsHandSwinging.current && isHandSwinging) {
-      console.log('手の振り具合が小さいから大きいに変化しました！');
       handleRun(); // 腕を振ることで走る処理を実行
     }
     prevIsHandSwinging.current = isHandSwinging; // 前回の状態を更新
@@ -84,6 +85,8 @@ const GamePage: React.FC = () => {
 
   // 制限時間のカウントダウン
   useEffect(() => {
+    if (!isGameStarted) return; // ゲームがスタートしていない場合は何もしない
+
     if (timeLeft <= 0) {
       navigate('/gameover'); // 制限時間が0になったらゲームオーバー画面に遷移
       return;
@@ -94,7 +97,7 @@ const GamePage: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer); // クリーンアップ
-  }, [timeLeft, navigate]);
+  }, [timeLeft, isGameStarted, navigate]);
 
   // ゴールに到達したらクリア画面に遷移
   useEffect(() => {
@@ -135,24 +138,47 @@ const GamePage: React.FC = () => {
 
         {/* Main game area */}
         <div className="flex-1 flex flex-col items-center justify-center p-4 z-10">
-          {/* Webcam and Canvas for Hand Landmarks */}
-          <div
-            className="relative w-full flex justify-center items-center"
-            style={{ height: '60vh' }} // Set height to 70% of the viewport height
-          >
-            <Webcam
-              audio={false}
-              style={{ visibility: 'hidden' }}
-              ref={webcamRef}
-              screenshotFormat="image/jpeg"
-              videoConstraints={{
-                width: window.innerWidth,
-                height: window.innerHeight,
-                facingMode: 'user'
-              }}
-            />
-            <canvas ref={canvasRef} className="absolute w-full h-full" />
-          </div>
+          {!isGameStarted ? (
+            <div className="text-center text-white">
+              <h2 className="text-2xl font-bold mb-4">手を画面前に構えてください</h2>
+              <p className="text-lg">ゲームがスタートします</p>
+                <div
+                  className="relative w-1/4 flex justify-center items-center"
+                  style={{ height: '15vh' }}
+                >
+                  <Webcam
+                  audio={false}
+                  style={{ visibility: 'hidden' }}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  videoConstraints={{
+                    width: window.innerWidth / 4,
+                    height: window.innerHeight / 4,
+                    facingMode: 'user'
+                  }}
+                  />
+                  <canvas ref={canvasRef} className="absolute w-full h-full" />
+                </div>
+            </div>
+          ) : (
+            <div
+              className="relative w-full flex justify-center items-center"
+              style={{ height: '60vh' }}
+            >
+              <Webcam
+                audio={false}
+                style={{ visibility: 'hidden' }}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                videoConstraints={{
+                  width: window.innerWidth,
+                  height: window.innerHeight,
+                  facingMode: 'user'
+                }}
+              />
+              <canvas ref={canvasRef} className="absolute w-full h-full" />
+            </div>
+          )}
         </div>
 
         {/* Progress bar */}
@@ -174,18 +200,6 @@ const GamePage: React.FC = () => {
               ></div>
             </div>
           </div>
-
-          {/* デバッグ用 */}
-          {/* <div>手の振り具合: {isHandSwinging ? '大きい' : '小さい'}</div>
-          <div className="flex justify-center">
-            <button
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-0 px-8 rounded-full text-xl transition-transform transform hover:scale-105 active:scale-95 focus:outline-none"
-              onClick={handleRun}
-            >
-              走る！
-            </button>
-          </div> */}
-
         </div>
       </div>
     </PageTransition>
