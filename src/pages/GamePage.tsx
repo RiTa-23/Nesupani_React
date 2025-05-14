@@ -17,7 +17,7 @@ const GamePage: React.FC = () => {
   const goalDistance = 500; // ゴールまでの距離
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(3); // 制限時間を30秒に設定
+  const [timeLeft, setTimeLeft] = useState(30); // 制限時間を30秒に設定
   const [isHandSwinging, setIsHandSwinging] = useState(true); // 手の振り具合を管理
   const prevIsHandSwinging = useRef(isHandSwinging); // 前回の状態を追跡
 
