@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, RotateCcw } from 'lucide-react';
 import Button from '../components/Button';
 import PageTransition from '../components/PageTransition';
 import TrainIcon from '../components/TrainIcon';
+import useSound from 'use-sound';
 
 const GameOverPage: React.FC = () => {
   const navigate = useNavigate();
+  const [playGameOverSound] = useSound('/sounds/gameover.mp3', { volume: 0.5 }); // 効果音をロード
+
+  useEffect(() => {
+    playGameOverSound(); // コンポーネントのマウント時に効果音を再生
+  }, [playGameOverSound]);
 
   return (
     <PageTransition>

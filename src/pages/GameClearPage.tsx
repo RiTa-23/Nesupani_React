@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, RotateCcw, Trophy } from 'lucide-react';
 import Button from '../components/Button';
 import PageTransition from '../components/PageTransition';
 import TrainIcon from '../components/TrainIcon';
+import useSound from 'use-sound';
 
 const GameClearPage: React.FC = () => {
   const navigate = useNavigate();
+  const [playClearSound] = useSound('/sounds/clear.mp3', { volume: 0.5 }); // 効果音をロード
+
+  useEffect(() => {
+    playClearSound(); // コンポーネントのマウント時に効果音を再生
+  }, [playClearSound]);
 
   return (
     <PageTransition>

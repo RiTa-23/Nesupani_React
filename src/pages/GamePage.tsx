@@ -8,12 +8,16 @@ import type { Results } from '@mediapipe/hands';
 import { drawCanvas } from '../utils/drawCanvas.ts';
 import Button from '../components/Button';
 import PageTransition from '../components/PageTransition';
+import useSound from 'use-sound';
 
 const GamePage: React.FC = () => {
+  // 音声ファイルのインポート
+  const [stepSound] = useSound('/sounds/step.mp3', { volume: 0.5 });
+
   const goalDistance = 500; // ゴールまでの距離
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30); // 制限時間を30秒に設定
+  const [timeLeft, setTimeLeft] = useState(3); // 制限時間を30秒に設定
   const [isHandSwinging, setIsHandSwinging] = useState(true); // 手の振り具合を管理
   const prevIsHandSwinging = useRef(isHandSwinging); // 前回の状態を追跡
 
@@ -21,7 +25,10 @@ const GamePage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleRun = () => {
+    stepSound(); // 足音の音を再生
+    console.log('走る！');
     setProgress(prev => Math.min(goalDistance, prev + 5));
+
   };
 
   /**
