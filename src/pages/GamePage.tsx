@@ -8,19 +8,27 @@ import type { Results } from '@mediapipe/hands';
 import { drawCanvas } from '../utils/drawCanvas.ts';
 import Button from '../components/Button';
 import PageTransition from '../components/PageTransition';
+import useSound from 'use-sound';
 
 const GamePage: React.FC = () => {
+  // 音声ファイルのインポート
+  const [stepSound] = useSound('/sounds/step.mp3', { volume: 0.5 });
+
+  const goalDistance = 500; // ゴールまでの距離
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
-  const [timeLeft] = useState(30); // 30 seconds to catch the train
-  const [isHandSwinging, setIsHandSwinging] = useState(false); // 手の振り具合を管理
+  const [timeLeft, setTimeLeft] = useState(3); // 制限時間を30秒に設定
+  const [isHandSwinging, setIsHandSwinging] = useState(true); // 手の振り具合を管理
   const prevIsHandSwinging = useRef(isHandSwinging); // 前回の状態を追跡
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleRun = () => {
-    setProgress(prev => Math.min(200, prev + 5));
+    stepSound(); // 足音の音を再生
+    console.log('走る！');
+    setProgress(prev => Math.min(goalDistance, prev + 5));
+
   };
 
   /**
@@ -73,6 +81,27 @@ const GamePage: React.FC = () => {
     }
     prevIsHandSwinging.current = isHandSwinging; // 前回の状態を更新
   }, [isHandSwinging]);
+
+  // 制限時間のカウントダウン
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      navigate('/gameover'); // 制限時間が0になったらゲームオーバー画面に遷移
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer); // クリーンアップ
+  }, [timeLeft, navigate]);
+
+  // ゴールに到達したらクリア画面に遷移
+  useEffect(() => {
+    if (progress >= goalDistance) {
+      navigate('/gameclear'); // ゴールに到達したらゲームクリア画面に遷移
+    }
+  }, [progress, goalDistance, navigate]);
 
   return (
     <PageTransition>
@@ -129,7 +158,7 @@ const GamePage: React.FC = () => {
         {/* Progress bar */}
         <div className="bg-gray-100 rounded-xl w-full max-w-10xl p-6 border-4 border-gray-300" style={{ width: '100%' }}>
           <div className="text-center mb-6">
-            <p className="text-gray-600">あと{Math.max(0, 200 - progress)}メートル</p>
+            <p className="text-gray-600">あと{Math.max(0, goalDistance - progress)}メートル</p>
           </div>
 
           {/* Progress meter */}
@@ -141,13 +170,13 @@ const GamePage: React.FC = () => {
             <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-green-500 transition-all duration-300"
-                style={{ width: `${progress / 2}%` }}
+                style={{ width: `${(progress / goalDistance) * 100}%` }}
               ></div>
             </div>
           </div>
 
           {/* デバッグ用 */}
-          <div>手の振り具合: {isHandSwinging ? '大きい' : '小さい'}</div>
+          {/* <div>手の振り具合: {isHandSwinging ? '大きい' : '小さい'}</div>
           <div className="flex justify-center">
             <button
               className="bg-green-500 hover:bg-green-600 text-white font-bold py-0 px-8 rounded-full text-xl transition-transform transform hover:scale-105 active:scale-95 focus:outline-none"
@@ -155,7 +184,8 @@ const GamePage: React.FC = () => {
             >
               走る！
             </button>
-          </div>
+          </div> */}
+
         </div>
       </div>
     </PageTransition>
