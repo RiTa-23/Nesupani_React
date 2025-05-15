@@ -14,7 +14,7 @@ export const drawCanvas = (
     results: Results,
     videoWidth: number,
     videoHeight: number,
-    setIsHandSwinging: (isHandSwinging: boolean) => void
+    setHandSwinging: (HandSwinging: number|null) => void
 ) => {
     // 画面の縦横比を取得
     const screenWidth = window.innerWidth;
@@ -43,7 +43,7 @@ export const drawCanvas = (
     ctx.clearRect(0, 0, width, height);
 
     if (results.multiHandLandmarks) {
-        drawLine(ctx, results.multiHandLandmarks, setIsHandSwinging); // 状態更新用のコールバックを渡す
+        drawLine(ctx, results.multiHandLandmarks, setHandSwinging); // 状態更新用のコールバックを渡す
       }
 
     // canvas の左右反転
@@ -56,7 +56,7 @@ export const drawCanvas = (
             drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
             drawLandmarks(ctx, landmarks, { color: '#FF0000', lineWidth: 2, radius: 3 });
         }
-        drawLine(ctx, results.multiHandLandmarks,setIsHandSwinging); // 状態更新用のコールバックを渡す
+        drawLine(ctx, results.multiHandLandmarks,setHandSwinging); // 状態更新用のコールバックを渡す
     }
     ctx.restore();
 };
@@ -67,7 +67,7 @@ export const drawCanvas = (
  * @param handLandmarks
  */
 const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandmarkListList,
-    setIsHandSwinging: (isHandSwinging: boolean) => void
+    setHandSwinging: (isHandSwinging: number) => void
 ) => {
     if (handLandmarks.length === 2 && handLandmarks[0].length > 8 && handLandmarks[1].length > 8) {
         const width = ctx.canvas.width;
@@ -75,25 +75,25 @@ const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandma
 
         const y1 = handLandmarks[0][0].y * height;
         const y2 = handLandmarks[1][0].y * height;
-        console.log('y1:', y1, 'y2:', y2);
         
         // 画面の中心からのズレを計算
         const y = (y1 + y2) / 2;
         const ygap=height/2-y;
 
         // y1とy2の差を計算
-        const diff = Math.abs(y1 - y2);
-        console.log('diff:', diff);
-
-
+        const diff = y1 - y2;
         
         if(diff > 200) {
             ctx.strokeStyle = '#00FF62FF';
-            setIsHandSwinging(true);
+            setHandSwinging(1);
+        }
+        else if(diff<-200){
+            ctx.strokeStyle = '#00FF62FF';
+            setHandSwinging(-1);
         }
         else if(diff < 150){
             ctx.strokeStyle = '#FF0000FF';
-            setIsHandSwinging(false);
+            setHandSwinging(0);
         }
         else{
             ctx.strokeStyle = '#0082cf';
