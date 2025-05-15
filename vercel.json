@@ -1,5 +1,15 @@
 {
+    "headers": [
+    {
+      "source": "/UnityBuild/(.*)\\.br",
+      "headers": [
+        { "key": "Content-Encoding", "value": "br" },
+        { "key": "Content-Type", "value": "application/octet-stream" }
+      ]
+    }
+  ],
     "rewrites": [
       { "source": "/(.*)", "destination": "/" }
     ]
+    
   }
