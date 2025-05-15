@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import  { useRef, useEffect, useState } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import Webcam from "react-webcam";
 import { Hands } from "@mediapipe/hands";
