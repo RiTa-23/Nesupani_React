@@ -7,10 +7,10 @@ import { drawCanvas } from "../utils/drawCanvas_tilt";
 
 function UnityTest() {
   const { unityProvider, sendMessage } = useUnityContext({
-    loaderUrl: "/UnityBuild/ReactTest.loader.js",
-    dataUrl: "/UnityBuild/ReactTest.data.br",
-    frameworkUrl: "/UnityBuild/ReactTest.framework.js.br",
-    codeUrl: "/UnityBuild/ReactTest.wasm.br",
+    loaderUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.loader.js",
+    dataUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.data.br",
+    frameworkUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.framework.js.br",
+    codeUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.wasm.br",
   });
 
   const webcamRef = useRef<Webcam>(null);
@@ -23,7 +23,7 @@ function UnityTest() {
     if (tiltValue === null) return;
 
     // 傾いた方向に移動
-    sendMessage("Cube", "MoveLeft", tiltValue);
+    sendMessage("Bike", "ChangeTiltValue", -tiltValue);
 
     prevHandTilt.current = tiltValue;
   }, [tiltValue, sendMessage]);
