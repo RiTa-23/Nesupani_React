@@ -64,7 +64,7 @@ const HomePage: React.FC = () => {
             <h3 className="font-bold text-lg mt-4">ルール:</h3>
             <ul className="list-disc pl-5 space-y-2">
               <li>このゲームではカメラを使用するので、カメラの権限を許可してください</li>
-              <li>カメラの前で腕を振る動作をすると、降った回数に応じてキャラクターが前に進みます</li>
+              <li>カメラの前で走るように両手を振る動作をすると、降った回数に応じてキャラクターが前に進みます</li>
               <li>出発までに間に合わないとゲームオーバーになります</li>
             </ul>
             <p className="mt-4 font-bold">遅刻しないように急いで電車に乗り込みましょう！</p>
