@@ -7,10 +7,10 @@ import { drawCanvas } from "../utils/drawCanvas_tilt";
 
 function UnityTest() {
   const { unityProvider, sendMessage } = useUnityContext({
-    loaderUrl: "/Build/ReactTest.loader.js",
-    dataUrl: "/Build/ReactTest.data.br",
-    frameworkUrl: "/Build/ReactTest.framework.js.br",
-    codeUrl: "/Build/ReactTest.wasm.br",
+    loaderUrl: "/UnityBuild/ReactTest.loader.js",
+    dataUrl: "/UnityBuild/ReactTest.data.br",
+    frameworkUrl: "/UnityBuild/ReactTest.framework.js.br",
+    codeUrl: "/UnityBuild/ReactTest.wasm.br",
   });
 
   const webcamRef = useRef<Webcam>(null);
