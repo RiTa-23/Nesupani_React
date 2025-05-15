@@ -73,8 +73,8 @@ const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandma
         const width = ctx.canvas.width;
         const height = ctx.canvas.height;
 
-        const y1 = handLandmarks[0][8].y * height;
-        const y2 = handLandmarks[1][8].y * height;
+        const y1 = handLandmarks[0][0].y * height;
+        const y2 = handLandmarks[1][0].y * height;
         console.log('y1:', y1, 'y2:', y2);
         
         // 画面の中心からのズレを計算

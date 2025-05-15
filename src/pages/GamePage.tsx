@@ -5,7 +5,7 @@ import Webcam from 'react-webcam';
 import { Camera } from '@mediapipe/camera_utils';
 import { Hands } from '@mediapipe/hands';
 import type { Results } from '@mediapipe/hands';
-import { drawCanvas } from '../utils/drawCanvas.ts';
+import { drawCanvas } from '../utils/drawCanvas_swing.ts';
 import Button from '../components/Button';
 import PageTransition from '../components/PageTransition';
 import useSound from 'use-sound';
