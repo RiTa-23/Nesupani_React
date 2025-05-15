@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import Webcam from "react-webcam";
 import { Hands } from "@mediapipe/hands";
@@ -7,24 +7,26 @@ import { drawCanvas } from "../utils/drawCanvas_tilt";
 
 function UnityTest() {
   const { unityProvider, sendMessage } = useUnityContext({
-    loaderUrl: "/UnityBuild/ReactTest.loader.js",
-    dataUrl: "/UnityBuild/ReactTest.data.br",
-    frameworkUrl: "/UnityBuild/ReactTest.framework.js.br",
-    codeUrl: "/UnityBuild/ReactTest.wasm.br",
+    loaderUrl: "/Build/ReactTest.loader.js",
+    dataUrl: "/Build/ReactTest.data.br",
+    frameworkUrl: "/Build/ReactTest.framework.js.br",
+    codeUrl: "/Build/ReactTest.wasm.br",
   });
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isHandSwinging, setIsHandSwinging] = useState(false);
-  const prevIsHandSwinging = useRef(false);
+  const [tiltValue, setHandTilt] = useState<number | null>(0);
+  const prevHandTilt = useRef<number | null>(0);
 
-  // Unityへ手の動きに応じてメッセージ送信
+  // 傾き値によってUnity関数を呼び出す
   useEffect(() => {
-    if (!prevIsHandSwinging.current && isHandSwinging) {
-      sendMessage("Cube", "MoveRight", 1); // 例: 右に動かす
-    }
-    prevIsHandSwinging.current = isHandSwinging;
-  }, [isHandSwinging, sendMessage]);
+    if (tiltValue === null) return;
+
+    // 傾いた方向に移動
+    sendMessage("Cube", "MoveLeft", tiltValue);
+
+    prevHandTilt.current = tiltValue;
+  }, [tiltValue, sendMessage]);
 
   // Mediapipe Handsセットアップ
   useEffect(() => {
@@ -49,7 +51,7 @@ function UnityTest() {
         results,
         video.videoWidth,
         video.videoHeight,
-        setIsHandSwinging
+        setHandTilt // ここで傾き値を受け取る
       );
     });
 
@@ -66,32 +68,64 @@ function UnityTest() {
   }, []);
 
   return (
-    <div>
-      <h1>ReactにUnity埋め込んでみた</h1>
+    <div
+      style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "100vh",
+      position: "relative",
+      }}
+    >
+      <h1>ReactとUnityの連携テスト</h1>
+      <h2>傾き検知：{tiltValue}</h2>
+
       <Webcam
-        ref={webcamRef}
-        style={{ visibility: "hidden", position: "absolute" }}
-        width={640}
-        height={480}
-        screenshotFormat="image/jpeg"
-        videoConstraints={{
-          width: 640,
-          height: 480,
-          facingMode: "user",
-        }}
+      ref={webcamRef}
+      style={{ visibility: "hidden", position: "absolute" }}
+      width={640}
+      height={480}
+      screenshotFormat="image/jpeg"
+      videoConstraints={{
+        width: 640,
+        height: 480,
+        facingMode: "user",
+      }}
       />
-      <canvas ref={canvasRef} style={{ position: "absolute", left: 0, top: 0, zIndex: 2 }} />
+      <canvas
+      ref={canvasRef}
+      width={640}
+      height={480}
+      style={{
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        zIndex: 2,
+        pointerEvents: "none",
+      }}
+      />
+      <div
+      style={{
+        position: "relative",
+        width: "70vw",
+        height: "70vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1,
+      }}
+      >
       <Unity
         unityProvider={unityProvider}
         style={{
-          position: "absolute",
-          top: 50,
-          left: 0,
-          width: "50%",
-          height: "50%",
-          zIndex: 1,
+        width: "100%",
+        height: "100%",
+        display: "block",
         }}
       />
+      </div>
     </div>
   );
 }

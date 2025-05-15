@@ -14,7 +14,7 @@ export const drawCanvas = (
     results: Results,
     videoWidth: number,
     videoHeight: number,
-    setIsHandSwinging: (isHandSwinging: boolean) => void
+    setHandTilt: (tiltValue: number | null) => void // コールバック名と型を変更
 ) => {
     // 画面の縦横比を取得
     const screenWidth = window.innerWidth;
@@ -52,7 +52,7 @@ export const drawCanvas = (
             drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
             drawLandmarks(ctx, landmarks, { color: '#FF0000', lineWidth: 2, radius: 3 });
         }
-        drawLine(ctx, results.multiHandLandmarks,setIsHandSwinging); // 状態更新用のコールバックを渡す
+        drawLine(ctx, results.multiHandLandmarks, setHandTilt); // コールバック名を変更
     }
     ctx.restore();
 };
@@ -62,8 +62,10 @@ export const drawCanvas = (
  * @param ctx
  * @param handLandmarks
  */
-const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandmarkListList,
-    setIsHandSwinging: (isHandSwinging: boolean) => void
+const drawLine = (
+    ctx: CanvasRenderingContext2D,
+    handLandmarks: NormalizedLandmarkListList,
+    setHandStill: (tiltValue: number | null) => void // コールバック名と型を変更
 ) => {
     if (handLandmarks.length === 2 && handLandmarks[0].length > 8 && handLandmarks[1].length > 8) {
         const width = ctx.canvas.width;
@@ -71,36 +73,32 @@ const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandma
 
         // 手首の位置を取得
         const rightHand = handLandmarks[0][0];
-        const leftHand= handLandmarks[1][0];
+        const leftHand = handLandmarks[1][0];
 
-        const x1=rightHand.x*width;
-        const x2=leftHand.x*width;
+        const x1 = rightHand.x * width;
+        const x2 = leftHand.x * width;
 
         const y1 = rightHand.y * height;
         const y2 = leftHand.y * height;
 
-        //傾きを計算
-        const tiltValue=-(y1-y2)/(x1-x2);
+        // 傾きを計算
+        const tiltValue = (y1 - y2) / (x1 - x2);
 
-
-
-        //傾きに応じて線の色を変化
-        if(tiltValue>0.2){//右に傾き {
+        // 傾きに応じて線の色を変化
+        if (tiltValue > 0.2) {
             ctx.strokeStyle = '#FF5959FF';
-            setIsHandSwinging(true);
-        }
-        else if(tiltValue<-0.2){//左に傾き
+        } else if (tiltValue < -0.2) {
             ctx.strokeStyle = '#6467FFFF';
-            setIsHandSwinging(false);
-        }
-        else{//そんなに傾いてないとき
+        } else {
             ctx.strokeStyle = '#98FFBEFF';
         }
 
-        ctx.lineWidth = 10;
+        setHandStill(tiltValue); // 傾き値をセット
+
+        ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.moveTo(x1,y1);
-        ctx.lineTo(x2,y2);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
         ctx.stroke();
     }
 };
