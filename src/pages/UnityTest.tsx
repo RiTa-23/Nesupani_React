@@ -2,10 +2,10 @@ import { Unity, useUnityContext } from "react-unity-webgl";
 
 function UnityTest() {
   const { unityProvider, sendMessage } = useUnityContext({
-    loaderUrl: "UnityBuild/ReactTest.loader.js",
-    dataUrl: "UnityBuild/ReactTest.data.br",
-    frameworkUrl: "UnityBuild/ReactTest.framework.js.br",
-    codeUrl: "UnityBuild/ReactTest.wasm.br",
+    loaderUrl: "/UnityBuild/ReactTest.loader.js",
+    dataUrl: "/UnityBuild/ReactTest.data.br",
+    frameworkUrl: "/UnityBuild/ReactTest.framework.js.br",
+    codeUrl: "/UnityBuild/ReactTest.wasm.br",
   });
 
   function moveRight() {
