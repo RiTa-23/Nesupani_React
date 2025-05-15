@@ -16,9 +16,9 @@ const GamePage: React.FC = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30); // 制限時間を30秒に設定
-  const [isHandSwinging, setIsHandSwinging] = useState(false); // 手の振り具合を管理
+  const [HandSwinging, setHandSwinging] = useState(1); // 手の振り具合を管理
   const [isGameStarted, setIsGameStarted] = useState(false); // ゲームがスタートしたかどうかを管理
-  const prevIsHandSwinging = useRef(isHandSwinging); // 前回の状態を追跡
+  const prevIsHandSwinging = useRef(HandSwinging); // 前回の状態を追跡
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -39,7 +39,9 @@ const GamePage: React.FC = () => {
       results,
       webcamRef.current!.video!.videoWidth,
       webcamRef.current!.video!.videoHeight,
-      setIsHandSwinging // 状態更新用の関数を渡す
+      (value: number | null) => {
+        if (typeof value === 'number') setHandSwinging(value);
+      } // 状態更新用の関数を渡す
     );
 
     // 手が画面前に構えられているかを判定
@@ -75,13 +77,17 @@ const GamePage: React.FC = () => {
     }
   }, [onResults]);
 
-  // 手の振り具合が「小さい」から「大きい」に変化したときの処理
+  // 手の振り具合が変化したときの処理（前回と異なる場合のみ走る）
   useEffect(() => {
-    if (!prevIsHandSwinging.current && isHandSwinging) {
-      handleRun(); // 腕を振ることで走る処理を実行
+    console.log('HandSwinging:', HandSwinging);
+    if (HandSwinging!==0 && prevIsHandSwinging.current !== HandSwinging) {
+      
+      handleRun();
+      console.log('手を振った！');
+      console.log('prev:', prevIsHandSwinging.current);
     }
-    prevIsHandSwinging.current = isHandSwinging; // 前回の状態を更新
-  }, [isHandSwinging]);
+    prevIsHandSwinging.current = HandSwinging;
+  }, [HandSwinging]);
 
   // 制限時間のカウントダウン
   useEffect(() => {
