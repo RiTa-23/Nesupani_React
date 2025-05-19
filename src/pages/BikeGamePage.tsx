@@ -23,7 +23,7 @@ function BikeGamePage() {
   const navigate = useNavigate();
 
   const goalDistance = 500;
-  const [progress, setProgress] = useState(0);
+  const progress = 0; // 進捗を管理するための状態
   const [timeLeft, setTimeLeft] = useState(30);
   const [isGameStarted, setIsGameStarted] = useState(false);
 
