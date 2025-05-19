@@ -4,6 +4,7 @@ import Webcam from "react-webcam";
 import { Hands } from "@mediapipe/hands";
 import { Camera } from "@mediapipe/camera_utils";
 import { drawCanvas } from "../utils/drawCanvas_tilt";
+import PageTransition from '../components/PageTransition';
 
 function UnityTest() {
   const { unityProvider, sendMessage } = useUnityContext({
@@ -16,16 +17,11 @@ function UnityTest() {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [tiltValue, setHandTilt] = useState<number | null>(0);
-  const prevHandTilt = useRef<number | null>(0);
 
   // 傾き値によってUnity関数を呼び出す
   useEffect(() => {
     if (tiltValue === null) return;
-
-    // 傾いた方向に移動
     sendMessage("Bike", "ChangeTiltValue", -tiltValue);
-
-    prevHandTilt.current = tiltValue;
   }, [tiltValue, sendMessage]);
 
   // Mediapipe Handsセットアップ
@@ -51,7 +47,7 @@ function UnityTest() {
         results,
         video.videoWidth,
         video.videoHeight,
-        setHandTilt // ここで傾き値を受け取る
+        setHandTilt
       );
     });
 
@@ -60,73 +56,69 @@ function UnityTest() {
         onFrame: async () => {
           await hands.send({ image: webcamRef.current!.video! });
         },
-        width: 640,
-        height: 480,
+        width: 1280,
+        height: 720,
       });
       camera.start();
     }
   }, []);
 
   return (
-    <div
-      style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: "100vh",
-      position: "relative",
-      }}
-    >
-      <h1>ReactとUnityの連携テスト</h1>
-      <h2>傾き検知：{tiltValue}</h2>
+    <PageTransition>
+      <div className="min-h-screen bg-gray-900 flex flex-col relative">
+        {/* Platform background */}
+        <div className="absolute inset-0 bg-yellow-900 opacity-20 z-0"></div>
 
-      <Webcam
-      ref={webcamRef}
-      style={{ visibility: "hidden", position: "absolute" }}
-      width={640}
-      height={480}
-      screenshotFormat="image/jpeg"
-      videoConstraints={{
-        width: 640,
-        height: 480,
-        facingMode: "user",
-      }}
-      />
-      <canvas
-      ref={canvasRef}
-      width={640}
-      height={480}
-      style={{
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-        zIndex: 2,
-        pointerEvents: "none",
-      }}
-      />
-      <div
-      style={{
-        position: "relative",
-        width: "70vw",
-        height: "70vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1,
-      }}
-      >
-      <Unity
-        unityProvider={unityProvider}
-        style={{
-        width: "100%",
-        height: "100%",
-        display: "block",
-        }}
-      />
+        {/* Main game area */}
+        <div className="flex-1 flex flex-col items-center justify-center p-4 z-10">
+          <div
+            style={{
+              position: "relative",
+              width: "70vw",
+              height: "70vh",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto",
+            }}
+          >
+            <Unity
+              unityProvider={unityProvider}
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "block",
+                borderRadius: "16px",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
+                background: "#222",
+              }}
+            />
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              style={{ visibility: "hidden", position: "absolute" }}
+              screenshotFormat="image/jpeg"
+              videoConstraints={{
+                width: window.innerWidth,
+                height: window.innerHeight,
+                facingMode: 'user'
+              }}
+            />
+            <canvas
+              ref={canvasRef}
+              className="absolute"
+              style={{
+                left: 0,
+                top: 0,
+                width: "100%",
+                height: "100%",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }
 

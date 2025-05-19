@@ -66,43 +66,60 @@ export const drawCanvas = (
  * @param ctx
  * @param handLandmarks
  */
-const drawLine = (ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandmarkListList,
-    setHandSwinging: (isHandSwinging: number) => void
+const drawLine = (
+  ctx: CanvasRenderingContext2D,
+  handLandmarks: NormalizedLandmarkListList,
+  setHandSwinging: (isHandSwinging: number) => void
 ) => {
-    if (handLandmarks.length === 2 && handLandmarks[0].length > 8 && handLandmarks[1].length > 8) {
-        const width = ctx.canvas.width;
-        const height = ctx.canvas.height;
+  if (
+    handLandmarks.length === 2 &&
+    handLandmarks[0].length > 8 &&
+    handLandmarks[1].length > 8
+  ) {
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
 
-        const y1 = handLandmarks[0][0].y * height;
-        const y2 = handLandmarks[1][0].y * height;
-        
-        // 画面の中心からのズレを計算
-        const y = (y1 + y2) / 2;
-        const ygap=height/2-y;
+    const y1 = handLandmarks[0][0].y * height;
+    const y2 = handLandmarks[1][0].y * height;
 
-        // y1とy2の差を計算
-        const diff = y1 - y2;
-        
-        if(diff > 200) {
-            ctx.strokeStyle = '#00FF62FF';
-            setHandSwinging(1);
-        }
-        else if(diff<-200){
-            ctx.strokeStyle = '#00FF62FF';
-            setHandSwinging(-1);
-        }
-        else if(diff < 150){
-            ctx.strokeStyle = '#FF0000FF';
-            setHandSwinging(0);
-        }
-        else{
-            ctx.strokeStyle = '#0082cf';
-        }
+    // 画面の中心からのズレを計算
+    const y = (y1 + y2) / 2;
+    const ygap = height / 2 - y;
 
-        ctx.lineWidth = 10;
-        ctx.beginPath();
-        ctx.moveTo(width/2, y1+ygap);
-        ctx.lineTo(width/2, y2+ygap);
-        ctx.stroke();
+    // y1とy2の差を計算
+    const diff = y1 - y2;
+
+    // 両手とも上にある場合のみ判定
+    const hands = handLandmarks.slice(0, 2); // 両手
+    const bothRaised = hands.every(hand => {
+      const wristY = hand[0].y * height;
+      const isRaised = wristY < height / 2;
+      return isRaised;
+    });
+
+    if (bothRaised) {
+      ctx.strokeStyle = '#FFD700'; // ゴールド
+      setHandSwinging(99); // 99の値で「両手を上に挙げた」ことを通知
     }
+    // --- ここまで追加 ---
+
+    else if (diff > 200) {
+      ctx.strokeStyle = '#00FF62FF';
+      setHandSwinging(1);
+    } else if (diff < -200) {
+      ctx.strokeStyle = '#00FF62FF';
+      setHandSwinging(-1);
+    } else if (diff < 150) {
+      ctx.strokeStyle = '#FF0000FF';
+      setHandSwinging(0);
+    } else {
+      ctx.strokeStyle = '#0082cf';
+    }
+
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(width / 2, y1 + ygap);
+    ctx.lineTo(width / 2, y2 + ygap);
+    ctx.stroke();
+  }
 };
