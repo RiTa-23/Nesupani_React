@@ -11,7 +11,7 @@ const HomePage: React.FC = () => {
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
   
   const handleStartGame = () => {
-    navigate('/game');
+    navigate('/rungame');
   };
   
   return (
@@ -22,7 +22,6 @@ const HomePage: React.FC = () => {
           <h1 className="text-5xl font-bold text-blue-600 mb-2">
             寝過ごしパニック
           </h1>
-          <p className="text-2xl text-blue-500 font-medium">Stage1</p>
         </div>
         
         <div className="flex flex-col items-center space-y-4 w-64 animate-fade-in">
