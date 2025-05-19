@@ -91,28 +91,35 @@ const drawLine = (
 
     // 両手とも上にある場合のみ判定
     const hands = handLandmarks.slice(0, 2); // 両手
-    const bothRaised = hands.every(hand => {
+    const bothOpenAndRaised = hands.every(hand => {
       const wristY = hand[0].y * height;
       const isRaised = wristY < height / 2;
       return isRaised;
     });
 
-    if (bothRaised) {
+    if (bothOpenAndRaised) {
       ctx.strokeStyle = '#FFD700'; // ゴールド
       setHandSwinging(99); // 99の値で「両手を上に挙げた」ことを通知
+      //丸を描く
+      ctx.beginPath();
+      ctx.lineWidth = 5;
+      ctx.arc(width / 2, height /2, 30, 0, Math.PI * 2);
+      ctx.stroke();
     }
-    // --- ここまで追加 ---
-
-    else if (diff > 200) {
+    else{
+        if (diff > 200) {
       ctx.strokeStyle = '#00FF62FF';
       setHandSwinging(1);
-    } else if (diff < -200) {
+    } 
+    else if (diff < -200) {
       ctx.strokeStyle = '#00FF62FF';
       setHandSwinging(-1);
-    } else if (diff < 150) {
+    }
+    else if (diff < 150) {
       ctx.strokeStyle = '#FF0000FF';
       setHandSwinging(0);
-    } else {
+    }
+    else {
       ctx.strokeStyle = '#0082cf';
     }
 
@@ -121,5 +128,7 @@ const drawLine = (
     ctx.moveTo(width / 2, y1 + ygap);
     ctx.lineTo(width / 2, y2 + ygap);
     ctx.stroke();
+    }
+
   }
 };

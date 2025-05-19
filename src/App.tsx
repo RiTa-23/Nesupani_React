@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import GamePage from './pages/RunGamePage';
+import RunGamePage from './pages/RunGamePage';
 import GameOverPage from './pages/GameOverPage';
 import GameClearPage from './pages/GameClearPage';
-import UnityTest from './pages/UnityTest';
+import BikeGamePage from './pages/BikeGamePage';
 
 
 function App() {
@@ -11,10 +11,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/game" element={<GamePage />} />
+        <Route path="/rungame" element={<RunGamePage />} />
         <Route path="/gameover" element={<GameOverPage />} />
         <Route path="/gameclear" element={<GameClearPage />} />
-        <Route path="/unitytest" element={<UnityTest />} />
+        <Route path="/bikegame" element={<BikeGamePage />} />
       </Routes>
     </Router>
   );
