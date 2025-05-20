@@ -37,7 +37,7 @@ const GamePage: React.FC = () => {
   });
 
   const [stepSound] = useSound('/sounds/step.mp3', { volume: 0.5 });
-  const goalDistance = 115;
+  const goalDistance = 85;
   const timeLimit = 30; // 制限時間を30秒に設定
   const navigate = useNavigate();
   const [speed, setSpeed] = useState(0);
