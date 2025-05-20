@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, Timer, MapPin, FileWarning as Running } from 'lucide-react';
+import { Box, LinearProgress } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material";
 import Webcam from 'react-webcam';
 import { Camera } from '@mediapipe/camera_utils';
 import { Hands } from '@mediapipe/hands';
@@ -10,9 +12,24 @@ import Button from '../components/Button.tsx';
 import PageTransition from '../components/PageTransition.tsx';
 import useSound from 'use-sound';
 import { Unity, useUnityContext } from "react-unity-webgl";
+import { AppLoading } from "../components/AppLoading";
+
+export type UnityAppProps = {
+  sx?: SxProps<Theme>;
+};
+
+declare global {
+  interface Window {
+    ReactUnityBridge?: {
+      onDistance?: (distance: number) => void;
+      onTime?: (time: number) => void;
+      onSpeed?: (speed: number) => void;
+    };
+  }
+}
 
 const GamePage: React.FC = () => {
-  const { unityProvider, sendMessage } = useUnityContext({
+  const { unityProvider, sendMessage, isLoaded, loadingProgression } = useUnityContext({
     loaderUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.loader.js",
     dataUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.data.br",
     frameworkUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.framework.js.br",
@@ -20,21 +37,49 @@ const GamePage: React.FC = () => {
   });
 
   const [stepSound] = useSound('/sounds/step.mp3', { volume: 0.5 });
-  const goalDistance = 500;
+  const goalDistance = 85;
+  const timeLimit = 30; // 制限時間を30秒に設定
   const navigate = useNavigate();
+  const [speed, setSpeed] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30); // 制限時間を30秒に設定
+  const [timeLeft, setTimeLeft] = useState(0); // 制限時間を30秒に設定
   const [HandSwinging, setHandSwinging] = useState(1); // 手の振り具合を管理
   const [isGameStarted, setIsGameStarted] = useState(false); // ゲームがスタートしたかどうかを管理
   const prevIsHandSwinging = useRef(HandSwinging); // 前回の状態を追跡
+  
+  // プログレスバーの幅を計算して状態として保持
+  const [progressPercentage, setProgressPercentage] = useState(0);
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Unity→Reactのコールバック受け取り
+  useEffect(() => {
+    // グローバルブリッジを作成
+    window.ReactUnityBridge = {
+      onDistance: (distance: number) => {
+        setProgress(distance);
+        // プログレスバーの幅を更新
+        setProgressPercentage((distance / goalDistance) * 100);
+      },
+      onTime: (time: number) => {
+        setTimeLeft(time);
+      },
+      onSpeed: (speed: number) => {
+        setSpeed(speed);
+        console.log("Speed: ", speed);
+      }
+    };
+    // クリーンアップ
+    return () => {
+      delete window.ReactUnityBridge;
+    };
+  }, [goalDistance]);
+
   const handleRun = () => {
     stepSound(); // 足音の音を再生
+    sendMessage("Player", "GameStart");
     sendMessage("Player", "SpeedUp"); // UnityのPlayerオブジェクトにメッセージを送信
-    setProgress(prev => Math.min(goalDistance, prev + 5));
   };
 
   /**
@@ -74,10 +119,12 @@ const GamePage: React.FC = () => {
 
     hands.onResults(onResults);
 
-    if (webcamRef.current) {
-      const camera = new Camera(webcamRef.current.video!, {
+    if (webcamRef.current && webcamRef.current.video) {
+      const camera = new Camera(webcamRef.current.video, {
         onFrame: async () => {
-          await hands.send({ image: webcamRef.current!.video! });
+          if (webcamRef.current && webcamRef.current.video) {
+            await hands.send({ image: webcamRef.current.video });
+          }
         },
         width: 1280,
         height: 720
@@ -88,31 +135,23 @@ const GamePage: React.FC = () => {
 
   // 手の振り具合が変化したときの処理（前回と異なる場合のみ走る）
   useEffect(() => {
-    if (HandSwinging!==0 && prevIsHandSwinging.current !== HandSwinging) {
-      if(HandSwinging==99){
+    if (HandSwinging !== 0 && prevIsHandSwinging.current !== HandSwinging) {
+      if (HandSwinging === 99) {
         sendMessage("Player", "Jump"); 
-      }
-      else{
+      } else {
         handleRun();
       }
-      
     }
     prevIsHandSwinging.current = HandSwinging;
   }, [HandSwinging]);
 
   // 制限時間のカウントダウン
   useEffect(() => {
-    if (!isGameStarted) return;
-    if (timeLeft <= 0) {
+    if (!isGameStarted) return; // ゲームがスタートしていない場合は何もしない
+    if (timeLimit - timeLeft <= 0) {
       navigate('/gameover'); // 制限時間が0になったらゲームオーバー画面に遷移
-      return;
-    }
-    const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer); // クリーンアップ
-  }, [timeLeft, isGameStarted, navigate]);
+    } 
+  }, [timeLeft, isGameStarted, navigate, timeLimit]);
 
   // ゴールに到達したらクリア画面に遷移
   useEffect(() => {
@@ -120,6 +159,16 @@ const GamePage: React.FC = () => {
       navigate('/gameclear'); // ゴールに到達したらゲームクリア画面に遷移
     }
   }, [progress, goalDistance, navigate]);
+
+  // デバッグ用：progressの変更を確認
+  useEffect(() => {
+    console.log("Progress updated:", progress);
+    setProgressPercentage((progress / goalDistance) * 100);
+    console.log("Progress percentage:", progressPercentage);
+    console.log("Progress percentage updated:", Math.min(progressPercentage, 100));
+  }, [progress, progressPercentage]);
+
+  const percent = Math.min(progress/ goalDistance * 100, 100);
 
   return (
     <PageTransition>
@@ -141,11 +190,11 @@ const GamePage: React.FC = () => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center text-white">
               <Timer size={18} className="mr-1" />
-              <span>{timeLeft}秒</span>
+              <span>{(timeLimit-timeLeft).toFixed(2)}秒</span>
             </div>
             <div className="flex items-center text-white">
               <MapPin size={18} className="mr-1" />
-              <span>目的地：基山駅</span>
+              <span>速さ：{speed.toFixed(2)}｜距離:{progress.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -158,8 +207,8 @@ const GamePage: React.FC = () => {
               style={{ background: "rgba(0,0,0,0.3)" }}
             >
               <div className="text-center text-white pointer-events-auto">
-          <h2 className="text-2xl font-bold mb-4">手を画面前に構えてください</h2>
-          <p className="text-lg">ゲームがスタートします</p>
+                <h2 className="text-2xl font-bold mb-4">手を画面前に構えてください</h2>
+                <p className="text-lg">ゲームがスタートします</p>
               </div>
             </div>
           )}
@@ -176,17 +225,31 @@ const GamePage: React.FC = () => {
               margin: "0 auto",
             }}
           >
-            <Unity
-              unityProvider={unityProvider}
-              style={{
-                width: "100%",
-                height: "100%",
-                display: "block",
-                borderRadius: "16px",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
-                background: "#222",
-              }}
-            />
+            <Box bgcolor={"#000000"} position="relative" width="100%" height="100%">
+              <AppLoading
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  visibility: isLoaded ? "hidden" : "visible",
+                  zIndex: 10,
+                }}
+                loadingProgression={loadingProgression}
+              />
+              <Unity
+                unityProvider={unityProvider}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "block",
+                  borderRadius: "16px",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
+                  background: "#222",
+                }}
+              />
+            </Box>
             <Webcam
               audio={false}
               ref={webcamRef}
@@ -211,21 +274,19 @@ const GamePage: React.FC = () => {
             />
           </div>
         </div>
+        
         {/* Progress bar */}
         <div className="bg-gray-100 rounded-xl w-full max-w-10xl p-6 border-4 border-gray-300" style={{ width: '100%' }}>
-
           {/* Progress meter */}
           <div className="mb-8">
             <div className="flex items-center mb-2">
               <Running size={20} className="mr-2 text-green-500" />
               <span className="font-medium text-gray-700">ゴールまでの距離</span>
+              <span className="ml-2 text-sm text-gray-500">
+                ({progress.toFixed(2)} / {goalDistance})
+              </span>
             </div>
-            <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-green-500 transition-all duration-300"
-                style={{ width: `${(progress / goalDistance) * 100}%` }}
-              ></div>
-            </div>
+            <LinearProgress variant='determinate' value={percent} />
           </div>
         </div>
       </div>
