@@ -11,7 +11,7 @@ const HomePage: React.FC = () => {
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
   
   const handleStartGame = () => {
-    navigate('/rungame');
+    navigate('/bikegame');
   };
   
   return (

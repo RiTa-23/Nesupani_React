@@ -3,14 +3,16 @@ import { Unity, useUnityContext } from "react-unity-webgl";
 import { useNavigate } from 'react-router-dom';
 import Webcam from "react-webcam";
 import { Hands, type Results } from "@mediapipe/hands";
+import { Box } from "@mui/material";
 import { Camera } from "@mediapipe/camera_utils";
 import { drawCanvas } from "../utils/drawCanvas_tilt.ts";
 import PageTransition from '../components/PageTransition.tsx';
 import Button from '../components/Button.tsx';
 import { Home, Timer, MapPin, FileWarning as Running } from 'lucide-react';
+import { AppLoading } from "../components/AppLoading";
 
 function BikeGamePage() {
-  const { unityProvider, sendMessage } = useUnityContext({
+  const { unityProvider, sendMessage,isLoaded, loadingProgression } = useUnityContext({
     loaderUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.loader.js",
     dataUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.data.br",
     frameworkUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.framework.js.br",
@@ -149,17 +151,31 @@ function BikeGamePage() {
               margin: "0 auto",
             }}
           >
-            <Unity
-              unityProvider={unityProvider}
-              style={{
-                width: "100%",
-                height: "100%",
-                display: "block",
-                borderRadius: "16px",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
-                background: "#222",
-              }}
-            />
+            <Box bgcolor={"#000000"} position="relative" width="100%" height="100%">
+              <AppLoading
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  visibility: isLoaded ? "hidden" : "visible",
+                  zIndex: 10,
+                }}
+                loadingProgression={loadingProgression}
+              />
+              <Unity
+                unityProvider={unityProvider}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "block",
+                  borderRadius: "16px",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
+                  background: "#222",
+                }}
+              />
+            </Box>
             <Webcam
               audio={false}
               ref={webcamRef}
