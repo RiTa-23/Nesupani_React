@@ -28,7 +28,7 @@ declare global {
   }
 }
 
-const GamePage: React.FC = () => {
+const RunGamePage: React.FC = () => {
   const { unityProvider, sendMessage, isLoaded, loadingProgression } = useUnityContext({
     loaderUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.loader.js",
     dataUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.data.br",
@@ -294,4 +294,4 @@ const GamePage: React.FC = () => {
   );
 };
 
-export default GamePage;
+export default RunGamePage;

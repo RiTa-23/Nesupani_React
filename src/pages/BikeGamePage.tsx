@@ -28,7 +28,7 @@ function BikeGamePage() {
 
   const goalDistance = 500;
   const progress = 0; // 進捗を管理するための状態
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(50);
   const [isGameStarted, setIsGameStarted] = useState(false);
 
   // 追加: ゲームID存在チェック用
