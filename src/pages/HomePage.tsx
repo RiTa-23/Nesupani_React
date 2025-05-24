@@ -7,6 +7,7 @@ import PageTransition from '../components/PageTransition';
 import TrainIcon from '../components/TrainIcon';
 import { db } from '../firebase';
 import { doc, getDoc } from "firebase/firestore";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -30,8 +31,18 @@ const HomePage: React.FC = () => {
     const docRef = doc(db, "gameIds", inputId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      // ログイン状態にする（例: localStorageやContextなどで管理）
       localStorage.setItem("gameId", inputId);
+
+      // Cloud Functions呼び出し
+      try {
+        const functions = getFunctions(undefined,"us-central1");
+        const sendLineGameStart = httpsCallable(functions, 'sendLineGameStart');
+        await sendLineGameStart({ gameId: inputId });
+      } catch (error) {
+          const err = error as any;
+          console.error("LINE送信エラー", err.response?.data || err.message);
+      }
+
       navigate('/bikegame');
     } else {
       setError('IDが存在しません');
