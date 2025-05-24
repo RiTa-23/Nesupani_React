@@ -7,7 +7,6 @@ import PageTransition from '../components/PageTransition';
 import TrainIcon from '../components/TrainIcon';
 import { db } from '../firebase';
 import { doc, getDoc } from "firebase/firestore";
-import { getFunctions, httpsCallable } from "firebase/functions";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
