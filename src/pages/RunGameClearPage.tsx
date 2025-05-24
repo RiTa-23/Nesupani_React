@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Home, Trophy } from 'lucide-react';
 import Button from '../components/Button';
 import PageTransition from '../components/PageTransition';

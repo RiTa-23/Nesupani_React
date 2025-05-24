@@ -8,7 +8,7 @@ import { Camera } from "@mediapipe/camera_utils";
 import { drawCanvas } from "../utils/drawCanvas_tilt.ts";
 import PageTransition from '../components/PageTransition.tsx';
 import Button from '../components/Button.tsx';
-import { Home, Timer, MapPin, FileWarning as Running } from 'lucide-react';
+import { Home, Timer, FileWarning as Running } from 'lucide-react';
 import { AppLoading } from "../components/AppLoading";
 import { db } from '../firebase';
 import { doc, getDoc } from "firebase/firestore";
@@ -183,10 +183,6 @@ function BikeGamePage() {
             <div className="flex items-center text-white">
               <Timer size={18} className="mr-1" />
               <span>{timeLeft}秒</span>
-            </div>
-            <div className="flex items-center text-white">
-              <MapPin size={18} className="mr-1" />
-              <span>目的地：基山駅</span>
             </div>
           </div>
         </div>
