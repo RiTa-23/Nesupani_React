@@ -109,7 +109,7 @@ function BikeGamePage() {
   useEffect(() => {
     if (!isGameStarted) return;
     if (timeLeft <= 0) {
-      navigate('/gameover');
+      navigate('/bikegameover');
       return;
     }
     const timer = setInterval(() => {
@@ -121,7 +121,7 @@ function BikeGamePage() {
   // ゴールに到達したらクリア画面に遷移
   useEffect(() => {
     if (progress >= goalDistance) {
-      navigate('/gameclear');
+      navigate('/bikegameclear');
     }
   }, [progress, goalDistance, navigate]);
 

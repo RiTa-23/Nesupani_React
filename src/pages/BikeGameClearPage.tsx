@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, RotateCcw, Trophy } from 'lucide-react';
+import { Home, Trophy } from 'lucide-react';
 import Button from '../components/Button';
 import PageTransition from '../components/PageTransition';
 import TrainIcon from '../components/TrainIcon';
 import useSound from 'use-sound';
 
-const GameClearPage: React.FC = () => {
+const BikeGameClearPage: React.FC = () => {
   const navigate = useNavigate();
   const [playClearSound] = useSound('/sounds/clear.mp3', { volume: 0.5 }); // 効果音をロード
 
@@ -33,21 +33,14 @@ const GameClearPage: React.FC = () => {
             次は寝過ごさないように気をつけましょう！
           </p>
           <div className="flex flex-col space-y-4">
-            <Button
-              onClick={() => navigate('/game')}
-              className="w-full flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500"
-            >
-              <RotateCcw className="mr-2" size={20} />
-              もう一度プレイ
-            </Button>
             
             <Button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/rungame')}
               variant="secondary"
               className="w-full flex items-center justify-center"
             >
               <Home className="mr-2" size={20} />
-              タイトルに戻る
+              次のステージへ
             </Button>
           </div>
         </div>
@@ -60,4 +53,4 @@ const GameClearPage: React.FC = () => {
   );
 };
 
-export default GameClearPage;
+export default BikeGameClearPage;

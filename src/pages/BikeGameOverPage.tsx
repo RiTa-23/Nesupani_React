@@ -6,7 +6,7 @@ import PageTransition from '../components/PageTransition';
 import TrainIcon from '../components/TrainIcon';
 import useSound from 'use-sound';
 
-const GameOverPage: React.FC = () => {
+const BikeGameOverPage: React.FC = () => {
   const navigate = useNavigate();
   const [playGameOverSound] = useSound('/sounds/gameover.mp3', { volume: 0.5 }); // 効果音をロード
 
@@ -39,7 +39,10 @@ const GameOverPage: React.FC = () => {
             </Button>
             
             <Button
-              onClick={() => navigate('/')}
+              onClick={() => {
+              const gameId = localStorage.getItem('gameId');
+              navigate(gameId ? `/?id=${gameId}` : '/');
+              }}
               variant="secondary"
               className="w-full flex items-center justify-center"
             >
@@ -57,4 +60,4 @@ const GameOverPage: React.FC = () => {
   );
 };
 
-export default GameOverPage;
+export default BikeGameOverPage;
