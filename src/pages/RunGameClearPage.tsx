@@ -7,7 +7,6 @@ import TrainIcon from '../components/TrainIcon';
 import useSound from 'use-sound';
 
 const RunGameClearPage: React.FC = () => {
-  const navigate = useNavigate();
   const [playClearSound] = useSound('/sounds/clear.mp3', { volume: 0.5 }); // 効果音をロード
 
   useEffect(() => {
