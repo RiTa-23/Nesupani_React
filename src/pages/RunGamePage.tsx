@@ -193,22 +193,25 @@ const RunGamePage: React.FC = () => {
   // ゴールに到達したらクリア画面に遷移
   useEffect(() => {
     const updateStage2Completed = async () => {
-    if (progress >= goalDistance) {
-      const gameId = localStorage.getItem("gameId");
+      if (progress >= goalDistance) {
+        const gameId = localStorage.getItem("gameId");
+        const timescore = (timeLimit - timeLeft).toFixed(2);
         if (gameId) {
           const docRef = doc(db, "gameIds", gameId);
           await import("firebase/firestore").then(({ updateDoc }) =>
-            updateDoc(docRef, { stage2Completed: true })
+            updateDoc(docRef, {
+              stage2Completed: true,
+              status: "stage2",
+              stage2Score: Math.round((45 + Number(timescore)) * 20)
+            })
           );
-          await import("firebase/firestore").then(({ updateDoc }) =>
-            updateDoc(docRef, { status: "stage2" })
-          );
+          console.log("stage2score", Math.round((45 + Number(timescore)) * 20));
         }
-      navigate('/rungameclear'); // ゴールに到達したらゲームクリア画面に遷移
-    }
-  }
+        navigate('/rungameclear');
+      }
+    };
     updateStage2Completed();
-  }, [progress, goalDistance, navigate]);
+  }, [progress, goalDistance, navigate, timeLeft, timeLimit]);
 
   // デバッグ用：progressの変更を確認
   useEffect(() => {

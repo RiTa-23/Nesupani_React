@@ -45,12 +45,12 @@ const BikeGameClearPage: React.FC = () => {
           <h1 className="text-4xl font-bold text-yellow-600 mb-2">
             ステージクリア！
           </h1>
-          <p className="text-xl text-yellow-500 font-medium">電車に無事乗車できました！</p>
+          <p className="text-xl text-yellow-500 font-medium">無事、駅近の駐車場まで辿り着きました！</p>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-lg max-w-md w-full mb-8 animate-fade-in">
           <p className="text-gray-700 text-center mb-4">
-            次は寝過ごさないように気をつけましょう！
+            次は電車まで走って乗り込みましょう！
           </p>
           {/* スコア表示 */}
           <div className="text-center my-4">
