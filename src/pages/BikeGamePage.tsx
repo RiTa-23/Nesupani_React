@@ -10,6 +10,8 @@ import PageTransition from '../components/PageTransition.tsx';
 import Button from '../components/Button.tsx';
 import { Home, Timer, MapPin, FileWarning as Running } from 'lucide-react';
 import { AppLoading } from "../components/AppLoading";
+import { db } from '../firebase';
+import { doc, getDoc } from "firebase/firestore";
 
 function BikeGamePage() {
   const { unityProvider, sendMessage,isLoaded, loadingProgression } = useUnityContext({
@@ -29,6 +31,28 @@ function BikeGamePage() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [isGameStarted, setIsGameStarted] = useState(false);
 
+  // 追加: ゲームID存在チェック用
+  const [loadingGameId, setLoadingGameId] = useState(true);
+  const [gameIdError, setGameIdError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkGameId = async () => {
+      const gameId = localStorage.getItem("gameId");
+      if (!gameId) {
+        setGameIdError("ゲームIDが見つかりません。URLを確認してください。");
+        setLoadingGameId(false);
+        return;
+      }
+      const docRef = doc(db, "gameIds", gameId);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        setGameIdError("ゲームIDが見つかりません。URLを確認してください。");
+      }
+      setLoadingGameId(false);
+    };
+    checkGameId();
+  }, []);
+
   // 傾き値によってUnity関数を呼び出す
   useEffect(() => {
     if (tiltValue === null) return;
@@ -36,7 +60,8 @@ function BikeGamePage() {
   }, [tiltValue, sendMessage]);
 
   // Mediapipe Handsセットアップ & 手を構えたらスタート
-  const onResults = useCallback((results:Results) => {
+  const onResults = useCallback((results: Results) => {
+    if (loadingGameId || gameIdError) return; // ← 追加
     const canvas = canvasRef.current;
     const video = webcamRef.current?.video;
     if (!canvas || !video) return;
@@ -51,7 +76,7 @@ function BikeGamePage() {
     if (!isGameStarted && results.multiHandLandmarks?.length > 0) {
       setIsGameStarted(true);
     }
-  }, [isGameStarted]);
+  }, [isGameStarted, loadingGameId, gameIdError]);
 
   useEffect(() => {
     const hands = new Hands({
@@ -99,6 +124,46 @@ function BikeGamePage() {
       navigate('/gameclear');
     }
   }, [progress, goalDistance, navigate]);
+
+  // エラー時のカードUI
+  const renderErrorCard = () => (
+    <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full flex flex-col items-center mx-auto mt-24">
+      <div className="text-red-500 mb-4">
+        <svg width="48" height="48" fill="none" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="12" fill="#FEE2E2"/>
+          <path d="M12 8v4m0 4h.01" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <h2 className="text-2xl font-bold mb-2 text-gray-800">ゲームを開始できません</h2>
+      <p className="mb-6 text-gray-600">{gameIdError}</p>
+      <Button
+        onClick={() => navigate('/')}
+        className="w-full mb-2 bg-green-500 hover:bg-green-600 text-white"
+      >
+        タイトルへ戻る
+      </Button>
+    </div>
+  );
+
+  // エラー時はカードUIのみ表示
+  if (loadingGameId) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+          読み込み中...
+        </div>
+      </PageTransition>
+    );
+  }
+  if (gameIdError) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen flex items-center justify-center bg-gray-900">
+          {renderErrorCard()}
+        </div>
+      </PageTransition>
+    );
+  }
 
   return (
     <PageTransition>
