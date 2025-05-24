@@ -248,13 +248,9 @@ function BikeGamePage() {
             <div className="flex items-center space-x-4">
             <div className="flex items-center text-white bg-red-600 px-4 py-2 rounded-lg shadow-lg" style={{ minWidth: 140, justifyContent: 'center' }}>
               <Timer size={24} className="mr-2" />
-              <span className="text-2xl font-bold tracking-widest" style={{ minWidth: 60, display: 'inline-block', textAlign: 'right' }}>
+              <span className="text-2xl font-bold tracking-widest" style={{ minWidth: 70, display: 'inline-block', textAlign: 'right' }}>
               {(timeLimit - timeLeft).toFixed(0)}秒
               </span>
-            </div>
-            <div className="flex items-center text-white">
-              <MapPin size={18} className="mr-1" />
-              <span>速さ：{speed.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -309,13 +305,41 @@ function BikeGamePage() {
                 }}
               />
               {/* 速度メーター（縦LinearProgressバー） */}
+              {/* 数値として表示 */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "5px",
+                  right: "-63%",
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  zIndex: 21,
+                }}
+              >
+                <span
+                  style={{
+                    color: "#fff",
+                    fontWeight: "bold",
+                    fontSize: "1.5rem",
+                    textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                    background: "rgba(0,0,0,0.5)",
+                    borderRadius: 8,
+                    padding: "2px 12px",
+                  }}
+                >
+                  速度：{speed.toFixed(2)}
+                </span>
+              {/* バー本体 */}
+              </div>
                   <div
                   style={{
                   position: "absolute",
                   top: "45%",
-                  right: "-35%",
-                  height: "20%",
-                  width: "50%",
+                  right: "-33%",
+                  height: "15%",
+                  width: "40%",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
