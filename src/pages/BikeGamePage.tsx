@@ -13,7 +13,7 @@ import { AppLoading } from "../components/AppLoading";
 import { db } from '../firebase';
 import { doc, getDoc } from "firebase/firestore";
 
-const goalDistance = 200;
+const goalDistance = 370;
 const timeLimit = 60;
 
 function BikeGamePage() {
@@ -229,14 +229,32 @@ function BikeGamePage() {
             <Home size={18} className="mr-1" />
             タイトルへ
           </Button>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center text-white">
-              <Timer size={18} className="mr-1" />
-              <span>{(timeLimit-timeLeft).toFixed(2)}秒</span>
+            <div
+              style={{
+              position: "absolute",
+              left: `${100 / 9}%`, // 画面幅の左からずらす
+              zIndex: 20,
+              }}
+            >
+              <Button
+              onClick={() => window.location.reload()}
+              variant="secondary"
+              size="small"
+              className="flex items-center mr-2 bg-yellow-500 hover:bg-yellow-600 text-white"
+              >
+              リトライ
+              </Button>
+            </div>
+            <div className="flex items-center space-x-4">
+            <div className="flex items-center text-white bg-red-600 px-4 py-2 rounded-lg shadow-lg" style={{ minWidth: 140, justifyContent: 'center' }}>
+              <Timer size={24} className="mr-2" />
+              <span className="text-2xl font-bold tracking-widest" style={{ minWidth: 60, display: 'inline-block', textAlign: 'right' }}>
+              {(timeLimit - timeLeft).toFixed(0)}秒
+              </span>
             </div>
             <div className="flex items-center text-white">
               <MapPin size={18} className="mr-1" />
-              <span>速さ：{speed.toFixed(2)}｜距離:{progress.toFixed(2)}</span>
+              <span>速さ：{speed.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -319,16 +337,20 @@ function BikeGamePage() {
         {/* Progress bar */}
         <div className="bg-gray-100 rounded-xl w-full max-w-10xl p-6 border-4 border-gray-300" style={{ width: '100%' }}>
           {/* Progress meter */}
-          <div className="mb-8">
+            <div className="mb-8">
             <div className="flex items-center mb-2">
               <Running size={20} className="mr-2 text-green-500" />
               <span className="font-medium text-gray-700">ゴールまでの距離</span>
               <span className="ml-2 text-sm text-gray-500">
-                ({progress.toFixed(2)} / {goalDistance})
+              ({progress.toFixed(2)} / {goalDistance})
               </span>
             </div>
-            <LinearProgress variant='determinate' value={percent} />
-          </div>
+            <LinearProgress
+              variant="determinate"
+              value={percent}
+              sx={{ height: 24, borderRadius: 8 }}
+            />
+            </div>
         </div>
       </div>
     </PageTransition>
