@@ -5,15 +5,39 @@ import Button from '../components/Button';
 import Modal from '../components/Modal';
 import PageTransition from '../components/PageTransition';
 import TrainIcon from '../components/TrainIcon';
+import { db } from '../firebase';
+import { doc, getDoc } from "firebase/firestore";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
-  
+  const [isIdInputOpen, setIsIdInputOpen] = useState(false);
+  const [inputId, setInputId] = useState('');
+  const [error, setError] = useState('');
+
+  // ID入力モーダルを開く
   const handleStartGame = () => {
-    navigate('/rungame');
+    setIsIdInputOpen(true);
   };
-  
+
+  // IDチェック＆ログイン
+  const handleIdSubmit = async () => {
+    setError('');
+    if (!inputId.match(/^[a-zA-Z0-9]{3}$/)) {
+      setError('3桁の英数字で入力してください');
+      return;
+    }
+    const docRef = doc(db, "gameIds", inputId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      // ログイン状態にする（例: localStorageやContextなどで管理）
+      localStorage.setItem("gameId", inputId);
+      navigate('/bikegame');
+    } else {
+      setError('IDが存在しません');
+    }
+  };
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex flex-col items-center justify-center p-4">
@@ -49,6 +73,28 @@ const HomePage: React.FC = () => {
           <Train size={36} className="text-blue-300" />
         </div>
         
+        {/* ID入力モーダル */}
+        <Modal 
+          isOpen={isIdInputOpen} 
+          onClose={() => setIsIdInputOpen(false)}
+          title="IDを入力してください"
+        >
+          <div className="space-y-4">
+            <input
+              type="text"
+              value={inputId}
+              onChange={e => setInputId(e.target.value)}
+              maxLength={3}
+              className="border rounded px-3 py-2 w-full text-center"
+              placeholder="例: A1B"
+            />
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+            <Button onClick={handleIdSubmit} size="large" className="w-full">
+              ゲーム開始
+            </Button>
+          </div>
+        </Modal>
+
         <Modal 
           isOpen={isHowToPlayOpen} 
           onClose={() => setIsHowToPlayOpen(false)}
