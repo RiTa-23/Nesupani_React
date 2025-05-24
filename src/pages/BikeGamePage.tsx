@@ -150,14 +150,17 @@ function BikeGamePage() {
     const updateStage1Completed = async () => {
       if (progress >= goalDistance) {
         const gameId = localStorage.getItem("gameId");
+        const timescore= (timeLimit - timeLeft).toFixed(2);
         if (gameId) {
           const docRef = doc(db, "gameIds", gameId);
           await import("firebase/firestore").then(({ updateDoc }) =>
-            updateDoc(docRef, { stage1Completed: true })
+            updateDoc(docRef, {
+              stage1Completed: true,
+              status: "stage1",
+              stage1Score: Math.round((45 + Number(timescore)) * 20)
+            })
           );
-          await import("firebase/firestore").then(({ updateDoc }) =>
-            updateDoc(docRef, { status: "stage1" })
-          );
+          console.log("stage1score", Math.round((45 + Number(timescore)) * 20));
         }
         navigate('/bikegameclear');
       }
