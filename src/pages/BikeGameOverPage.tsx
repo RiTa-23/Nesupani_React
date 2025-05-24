@@ -31,7 +31,7 @@ const BikeGameOverPage: React.FC = () => {
           </p>
           <div className="flex flex-col space-y-4">
             <Button
-              onClick={() => navigate('/rungame')}
+              onClick={() => navigate('/bikegame')}
               className="w-full flex items-center justify-center"
             >
               <RotateCcw className="mr-2" size={20} />

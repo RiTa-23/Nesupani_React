@@ -149,14 +149,14 @@ const GamePage: React.FC = () => {
   useEffect(() => {
     if (!isGameStarted) return; // ゲームがスタートしていない場合は何もしない
     if (timeLimit - timeLeft <= 0) {
-      navigate('/gameover'); // 制限時間が0になったらゲームオーバー画面に遷移
+      navigate('/rungameover'); // 制限時間が0になったらゲームオーバー画面に遷移
     } 
   }, [timeLeft, isGameStarted, navigate, timeLimit]);
 
   // ゴールに到達したらクリア画面に遷移
   useEffect(() => {
     if (progress >= goalDistance) {
-      navigate('/gameclear'); // ゴールに到達したらゲームクリア画面に遷移
+      navigate('/rungameclear'); // ゴールに到達したらゲームクリア画面に遷移
     }
   }, [progress, goalDistance, navigate]);
 

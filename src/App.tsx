@@ -4,6 +4,8 @@ import RunGamePage from './pages/RunGamePage';
 import BikeGameOverPage from './pages/BikeGameOverPage';
 import BikeGameClearPage from './pages/BikeGameClearPage';
 import BikeGamePage from './pages/BikeGamePage';
+import RunGameClearPage from './pages/RunGameClearPage';
+import RunGameOverPage from './pages/RunGameOverPage';
 
 
 function App() {
@@ -15,6 +17,8 @@ function App() {
         <Route path="/bikegameover" element={<BikeGameOverPage />} />
         <Route path="/bikegameclear" element={<BikeGameClearPage />} />
         <Route path="/bikegame" element={<BikeGamePage />} />
+        <Route path="/rungameclear" element={<RunGameClearPage />} />
+        <Route path="/rungameover" element={<RunGameOverPage />} />
       </Routes>
     </Router>
   );
