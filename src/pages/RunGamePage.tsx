@@ -200,6 +200,9 @@ const RunGamePage: React.FC = () => {
           await import("firebase/firestore").then(({ updateDoc }) =>
             updateDoc(docRef, { stage2Completed: true })
           );
+          await import("firebase/firestore").then(({ updateDoc }) =>
+            updateDoc(docRef, { status: "stage2" })
+          );
         }
       navigate('/rungameclear'); // ゴールに到達したらゲームクリア画面に遷移
     }

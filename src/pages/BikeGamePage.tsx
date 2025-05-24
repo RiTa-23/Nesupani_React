@@ -155,6 +155,9 @@ function BikeGamePage() {
           await import("firebase/firestore").then(({ updateDoc }) =>
             updateDoc(docRef, { stage1Completed: true })
           );
+          await import("firebase/firestore").then(({ updateDoc }) =>
+            updateDoc(docRef, { status: "stage1" })
+          );
         }
         navigate('/bikegameclear');
       }
