@@ -291,13 +291,15 @@ const RunGamePage: React.FC = () => {
             タイトルへ
           </Button>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center text-white">
-              <Timer size={18} className="mr-1" />
-              <span>{(timeLimit-timeLeft).toFixed(2)}秒</span>
+            <div className="flex items-center text-white bg-red-600 px-4 py-2 rounded-lg shadow-lg animate-pulse">
+              <Timer size={24} className="mr-2" />
+              <span className="text-2xl font-bold tracking-widest">
+              {(timeLimit - timeLeft).toFixed(2)}秒
+              </span>
             </div>
             <div className="flex items-center text-white">
               <MapPin size={18} className="mr-1" />
-              <span>速さ：{speed.toFixed(2)}｜距離:{progress.toFixed(2)}</span>
+              <span>速さ：{speed.toFixed(2)}</span>
             </div>
           </div>
         </div>
