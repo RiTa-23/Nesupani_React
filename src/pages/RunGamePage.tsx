@@ -13,6 +13,8 @@ import PageTransition from '../components/PageTransition.tsx';
 import useSound from 'use-sound';
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { AppLoading } from "../components/AppLoading";
+import { db } from '../firebase';
+import { doc, getDoc } from "firebase/firestore";
 
 export type UnityAppProps = {
   sx?: SxProps<Theme>;
@@ -29,6 +31,11 @@ declare global {
 }
 
 const RunGamePage: React.FC = () => {
+  // 追加: ゲームID存在チェック用
+  const [loadingGameId, setLoadingGameId] = useState(true);
+  const [gameIdError, setGameIdError] = useState<string | null>(null);
+
+  // --- 既存のstate ---
   const { unityProvider, sendMessage, isLoaded, loadingProgression } = useUnityContext({
     loaderUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.loader.js",
     dataUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.data.br",
@@ -38,20 +45,47 @@ const RunGamePage: React.FC = () => {
 
   const [stepSound] = useSound('/sounds/step.mp3', { volume: 0.5 });
   const goalDistance = 80;
-  const timeLimit = 30; // 制限時間を30秒に設定
+  const timeLimit = 30;
   const navigate = useNavigate();
   const [speed, setSpeed] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(0); // 制限時間を30秒に設定
-  const [HandSwinging, setHandSwinging] = useState(1); // 手の振り具合を管理
-  const [isGameStarted, setIsGameStarted] = useState(false); // ゲームがスタートしたかどうかを管理
-  const prevIsHandSwinging = useRef(HandSwinging); // 前回の状態を追跡
-  
-  // プログレスバーの幅を計算して状態として保持
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [HandSwinging, setHandSwinging] = useState(1);
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const prevIsHandSwinging = useRef(HandSwinging);
   const [progressPercentage, setProgressPercentage] = useState(0);
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // --- 追加: ゲームID存在チェック ---
+  useEffect(() => {
+    const checkGameId = async () => {
+      const gameId = localStorage.getItem("gameId");
+      if (!gameId) {
+        setGameIdError("ゲームIDが見つかりません。URLを確認してください。");
+        setLoadingGameId(false);
+        return;
+      }
+      const docRef = doc(db, "gameIds", gameId);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        setGameIdError("ゲームIDが見つかりません。URLを確認してください。");
+        setLoadingGameId(false);
+        return;
+      }
+      const data = docSnap.data();
+      if (data.stage2Completed === true) {
+        setGameIdError("このゲームは既にクリア済みです。");
+        setLoadingGameId(false);
+        return;
+      }
+      // stage2Completedがfalseならゲーム開始可
+      setGameIdError(null);
+      setLoadingGameId(false);
+    };
+    checkGameId();
+  }, []);
 
   // Unity→Reactのコールバック受け取り
   useEffect(() => {
@@ -87,6 +121,9 @@ const RunGamePage: React.FC = () => {
    * @param results
    */
   const onResults = useCallback((results: Results) => {
+    // 追加: ゲームIDチェックが終わっていない or エラー時は何もしない
+    if (loadingGameId || gameIdError) return;
+
     const canvasCtx = canvasRef.current!.getContext('2d')!;
     drawCanvas(
       canvasCtx,
@@ -95,14 +132,14 @@ const RunGamePage: React.FC = () => {
       webcamRef.current!.video!.videoHeight,
       (value: number | null) => {
         if (typeof value === 'number') setHandSwinging(value);
-      } // 状態更新用の関数を渡す
+      }
     );
 
     // 手が画面前に構えられているかを判定
     if (!isGameStarted && results.multiHandLandmarks?.length > 0) {
       setIsGameStarted(true); // ゲームをスタート
     }
-  }, [isGameStarted]);
+  }, [isGameStarted, loadingGameId, gameIdError]);
 
   // 初期設定
   useEffect(() => {
@@ -155,9 +192,19 @@ const RunGamePage: React.FC = () => {
 
   // ゴールに到達したらクリア画面に遷移
   useEffect(() => {
+    const updateStage2Completed = async () => {
     if (progress >= goalDistance) {
+      const gameId = localStorage.getItem("gameId");
+        if (gameId) {
+          const docRef = doc(db, "gameIds", gameId);
+          await import("firebase/firestore").then(({ updateDoc }) =>
+            updateDoc(docRef, { stage2Completed: true })
+          );
+        }
       navigate('/rungameclear'); // ゴールに到達したらゲームクリア画面に遷移
     }
+  }
+    updateStage2Completed();
   }, [progress, goalDistance, navigate]);
 
   // デバッグ用：progressの変更を確認
@@ -170,6 +217,56 @@ const RunGamePage: React.FC = () => {
 
   const percent = Math.min(progress/ goalDistance * 100, 100);
 
+  // エラー時のカードUI
+  const renderErrorCard = () => (
+    <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full flex flex-col items-center mx-auto mt-24">
+      <div className="text-red-500 mb-4">
+        <svg width="48" height="48" fill="none" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="12" fill="#FEE2E2"/>
+          <path d="M12 8v4m0 4h.01" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <h2 className="text-2xl font-bold mb-2 text-gray-800">ゲームを開始できません</h2>
+      <p className="mb-6 text-gray-600">{gameIdError}</p>
+      <Button
+        onClick={() => {
+          const gameId = localStorage.getItem('gameId');
+          window.location.href = `https://nesugoshipanic.web.app/?id=${gameId}`;
+       }}
+        className="w-full mb-2 bg-green-500 hover:bg-green-600 text-white"
+      >
+        Stage3へ
+      </Button>
+      <Button
+        onClick={() => navigate('/')}
+        className="w-full mb-2 bg-green-500 hover:bg-green-600 text-white"
+      >
+        タイトルへ戻る
+      </Button>
+    </div>
+  );
+
+  // --- エラー時・ロード時の分岐 ---
+  if (loadingGameId) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+          読み込み中...
+        </div>
+      </PageTransition>
+    );
+  }
+  if (gameIdError) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen flex items-center justify-center bg-gray-900">
+          {renderErrorCard()}
+        </div>
+      </PageTransition>
+    );
+  }
+
+  // --- ここから下は既存のゲーム画面のまま ---
   return (
     <PageTransition>
       <div className="min-h-screen bg-gray-900 flex flex-col relative">

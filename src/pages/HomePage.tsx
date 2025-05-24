@@ -20,7 +20,11 @@ const HomePage: React.FC = () => {
   // URLからidを取得し、Firestoreで存在チェック
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const id = params.get('id');
+    let id = params.get('id');
+    if (!id) {
+      // URLにidがなければlocalStorageから取得
+      id = localStorage.getItem("gameId");
+    }
     setInputId(id);
 
     if (!id) {
@@ -30,7 +34,7 @@ const HomePage: React.FC = () => {
     }
 
     const checkId = async () => {
-      const docRef = doc(db, "gameIds", id);
+      const docRef = doc(db, "gameIds", id!);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setIdExists(true);
