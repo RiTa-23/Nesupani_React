@@ -3,16 +3,21 @@ import { Unity, useUnityContext } from "react-unity-webgl";
 import { useNavigate } from 'react-router-dom';
 import Webcam from "react-webcam";
 import { Hands, type Results } from "@mediapipe/hands";
-import { Box } from "@mui/material";
+import { Box, LinearProgress } from "@mui/material";
 import { Camera } from "@mediapipe/camera_utils";
 import { drawCanvas } from "../utils/drawCanvas_tilt.ts";
 import PageTransition from '../components/PageTransition.tsx';
 import Button from '../components/Button.tsx';
 import { Home, Timer, MapPin, FileWarning as Running } from 'lucide-react';
 import { AppLoading } from "../components/AppLoading";
+import { db } from '../firebase';
+import { doc, getDoc } from "firebase/firestore";
+
+const goalDistance = 200;
+const timeLimit = 60;
 
 function BikeGamePage() {
-  const { unityProvider, sendMessage,isLoaded, loadingProgression } = useUnityContext({
+  const { unityProvider, sendMessage, isLoaded, loadingProgression } = useUnityContext({
     loaderUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.loader.js",
     dataUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.data.br",
     frameworkUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.framework.js.br",
@@ -24,19 +29,69 @@ function BikeGamePage() {
   const [tiltValue, setHandTilt] = useState<number | null>(0);
   const navigate = useNavigate();
 
-  const goalDistance = 500;
-  const progress = 0; // 進捗を管理するための状態
-  const [timeLeft, setTimeLeft] = useState(30);
+  // Unityから受け取る値
+  const [speed, setSpeed] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(50);
   const [isGameStarted, setIsGameStarted] = useState(false);
+
+  // ゲームID存在チェック
+  const [loadingGameId, setLoadingGameId] = useState(true);
+  const [gameIdError, setGameIdError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkGameId = async () => {
+      const gameId = localStorage.getItem("gameId");
+      if (!gameId) {
+        setGameIdError("ゲームIDが見つかりません。URLを確認してください。");
+        setLoadingGameId(false);
+        return;
+      }
+      const docRef = doc(db, "gameIds", gameId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        setGameIdError("ゲームIDが見つかりません。URLを確認してください。");
+        setLoadingGameId(false);
+        return;
+      }
+
+      const data = docSnap.data();
+      if (data.stage1Completed === true) {
+        setGameIdError("このゲームは既にクリア済みです。");
+        setLoadingGameId(false);
+        return;
+      }
+
+      // stage1Completedがfalseならゲーム開始可
+      setGameIdError(null);
+      setLoadingGameId(false);
+    };
+    checkGameId();
+  }, []);
+
+  // Unity→Reactのコールバック受け取り
+  useEffect(() => {
+    window.ReactUnityBridge = {
+      onDistance: (distance: number) => setProgress(distance),
+      onTime: (time: number) => setTimeLeft(time),
+      onSpeed: (speed: number) => setSpeed(speed),
+    };
+    return () => {
+      delete window.ReactUnityBridge;
+    };
+  }, []);
 
   // 傾き値によってUnity関数を呼び出す
   useEffect(() => {
     if (tiltValue === null) return;
     sendMessage("Bike", "ChangeTiltValue", -tiltValue);
+    sendMessage("Bike", "GameStart");
   }, [tiltValue, sendMessage]);
 
   // Mediapipe Handsセットアップ & 手を構えたらスタート
-  const onResults = useCallback((results:Results) => {
+  const onResults = useCallback((results: Results) => {
+    if (loadingGameId || gameIdError) return;
     const canvas = canvasRef.current;
     const video = webcamRef.current?.video;
     if (!canvas || !video) return;
@@ -51,7 +106,7 @@ function BikeGamePage() {
     if (!isGameStarted && results.multiHandLandmarks?.length > 0) {
       setIsGameStarted(true);
     }
-  }, [isGameStarted]);
+  }, [isGameStarted, loadingGameId, gameIdError]);
 
   useEffect(() => {
     const hands = new Hands({
@@ -68,10 +123,12 @@ function BikeGamePage() {
 
     hands.onResults(onResults);
 
-    if (webcamRef.current) {
-      const camera = new Camera(webcamRef.current.video!, {
+    if (webcamRef.current && webcamRef.current.video) {
+      const camera = new Camera(webcamRef.current.video, {
         onFrame: async () => {
-          await hands.send({ image: webcamRef.current!.video! });
+          if (webcamRef.current && webcamRef.current.video) {
+            await hands.send({ image: webcamRef.current.video });
+          }
         },
         width: 1280,
         height: 720,
@@ -83,22 +140,77 @@ function BikeGamePage() {
   // 制限時間のカウントダウン
   useEffect(() => {
     if (!isGameStarted) return;
-    if (timeLeft <= 0) {
-      navigate('/gameover');
-      return;
+    if ((timeLimit-timeLeft) <= 0) {
+      navigate('/bikegameover');
     }
-    const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
-    }, 1000);
-    return () => clearInterval(timer);
   }, [timeLeft, isGameStarted, navigate]);
 
   // ゴールに到達したらクリア画面に遷移
   useEffect(() => {
-    if (progress >= goalDistance) {
-      navigate('/gameclear');
-    }
-  }, [progress, goalDistance, navigate]);
+    const updateStage1Completed = async () => {
+      if (progress >= goalDistance) {
+        const gameId = localStorage.getItem("gameId");
+        if (gameId) {
+          const docRef = doc(db, "gameIds", gameId);
+          await import("firebase/firestore").then(({ updateDoc }) =>
+            updateDoc(docRef, { stage1Completed: true })
+          );
+          await import("firebase/firestore").then(({ updateDoc }) =>
+            updateDoc(docRef, { status: "stage1" })
+          );
+        }
+        navigate('/bikegameclear');
+      }
+    };
+    updateStage1Completed();
+  }, [progress, navigate]);
+
+  // エラー時のカードUI
+  const renderErrorCard = () => (
+    <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full flex flex-col items-center mx-auto mt-24">
+      <div className="text-red-500 mb-4">
+        <svg width="48" height="48" fill="none" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="12" fill="#FEE2E2"/>
+          <path d="M12 8v4m0 4h.01" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <h2 className="text-2xl font-bold mb-2 text-gray-800">ゲームを開始できません</h2>
+      <p className="mb-6 text-gray-600">{gameIdError}</p>
+      <Button
+        onClick={() => navigate('/rungame')}
+        className="w-full mb-2 bg-green-500 hover:bg-green-600 text-white"
+      >
+        Stage2へ
+      </Button>
+      <Button
+        onClick={() => navigate('/')}
+        className="w-full mb-2 bg-green-500 hover:bg-green-600 text-white"
+      >
+        タイトルへ戻る
+      </Button>
+    </div>
+  );
+
+  if (loadingGameId) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+          読み込み中...
+        </div>
+      </PageTransition>
+    );
+  }
+  if (gameIdError) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen flex items-center justify-center bg-gray-900">
+          {renderErrorCard()}
+        </div>
+      </PageTransition>
+    );
+  }
+
+  const percent = Math.min((progress / goalDistance) * 100, 100);
 
   return (
     <PageTransition>
@@ -117,11 +229,11 @@ function BikeGamePage() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center text-white">
               <Timer size={18} className="mr-1" />
-              <span>{timeLeft}秒</span>
+              <span>{(timeLimit-timeLeft).toFixed(2)}秒</span>
             </div>
             <div className="flex items-center text-white">
               <MapPin size={18} className="mr-1" />
-              <span>目的地：基山駅</span>
+              <span>速さ：{speed.toFixed(2)}｜距離:{progress.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -201,18 +313,18 @@ function BikeGamePage() {
           </div>
         </div>
         {/* Progress bar */}
+        {/* Progress bar */}
         <div className="bg-gray-100 rounded-xl w-full max-w-10xl p-6 border-4 border-gray-300" style={{ width: '100%' }}>
+          {/* Progress meter */}
           <div className="mb-8">
             <div className="flex items-center mb-2">
               <Running size={20} className="mr-2 text-green-500" />
               <span className="font-medium text-gray-700">ゴールまでの距離</span>
+              <span className="ml-2 text-sm text-gray-500">
+                ({progress.toFixed(2)} / {goalDistance})
+              </span>
             </div>
-            <div className="h-6 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-green-500 transition-all duration-300"
-                style={{ width: `${(progress / goalDistance) * 100}%` }}
-              ></div>
-            </div>
+            <LinearProgress variant='determinate' value={percent} />
           </div>
         </div>
       </div>

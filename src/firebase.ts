@@ -3,7 +3,7 @@ import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   // ここにFirebaseコンソールで取得した設定を記載
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "nesugoshipanic.firebaseapp.com",
   projectId: "nesugoshipanic",
   storageBucket: "nesugoshipanic.firebasestorage.app",
