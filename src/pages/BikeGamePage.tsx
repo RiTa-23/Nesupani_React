@@ -13,7 +13,7 @@ import { AppLoading } from "../components/AppLoading";
 import { db } from '../firebase';
 import { doc, getDoc } from "firebase/firestore";
 
-const goalDistance = 370;
+const goalDistance = 360;
 const timeLimit = 60;
 
 function BikeGamePage() {
@@ -308,6 +308,41 @@ function BikeGamePage() {
                   background: "#222",
                 }}
               />
+              {/* 速度メーター（縦LinearProgressバー） */}
+                  <div
+                  style={{
+                  position: "absolute",
+                  top: "45%",
+                  right: "-35%",
+                  height: "20%",
+                  width: "50%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  zIndex: 20,
+                  }}
+                >
+                  <LinearProgress
+                  variant="determinate"
+                  value={Math.min(speed) / 40 * 100}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 8,
+                    transform: 'rotate(-90deg)',
+                    backgroundColor: '#e5e7eb',
+                    '& .MuiLinearProgress-bar': {
+                    background:
+                      speed > 30
+                      ? 'linear-gradient(to top, #ef4444, #b91c1c)'
+                      : speed >= 20
+                        ? 'linear-gradient(to top, #fde047, #facc15)'
+                        : 'linear-gradient(to top, #22d3ee, #2563eb)',
+                    },
+                  }}
+                  />
+                </div>
+
             </Box>
             <Webcam
               audio={false}
@@ -333,7 +368,6 @@ function BikeGamePage() {
             />
           </div>
         </div>
-        {/* Progress bar */}
         {/* Progress bar */}
         <div className="bg-gray-100 rounded-xl w-full max-w-10xl p-6 border-4 border-gray-300" style={{ width: '100%' }}>
           {/* Progress meter */}
