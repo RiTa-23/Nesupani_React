@@ -8,7 +8,7 @@ import { Camera } from "@mediapipe/camera_utils";
 import { drawCanvas } from "../utils/drawCanvas_tilt.ts";
 import PageTransition from '../components/PageTransition.tsx';
 import Button from '../components/Button.tsx';
-import { Home, Timer, MapPin, FileWarning as Running } from 'lucide-react';
+import { Home, Timer, FileWarning as Running } from 'lucide-react';
 import { AppLoading } from "../components/AppLoading";
 import { db } from '../firebase';
 import { doc, getDoc } from "firebase/firestore";
