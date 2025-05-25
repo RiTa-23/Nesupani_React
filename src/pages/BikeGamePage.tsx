@@ -17,7 +17,7 @@ const goalDistance = 360;
 const timeLimit = 60;
 
 function BikeGamePage() {
-  const { unityProvider, sendMessage, isLoaded, loadingProgression } = useUnityContext({
+  const { unityProvider, sendMessage, isLoaded, loadingProgression, unload } = useUnityContext({
     loaderUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.loader.js",
     dataUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.data.br",
     frameworkUrl: "/UnityBuild/BikeScene/Nesupani_Unity_Bike.framework.js.br",
@@ -193,6 +193,13 @@ function BikeGamePage() {
       </Button>
     </div>
   );
+
+  useEffect(() => {
+    return () => {
+      // ページアンマウント時にUnityをアンロード
+      unload();
+    };
+  }, [unload]);
 
   if (loadingGameId) {
     return (

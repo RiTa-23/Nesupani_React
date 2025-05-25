@@ -36,7 +36,7 @@ const RunGamePage: React.FC = () => {
   const [gameIdError, setGameIdError] = useState<string | null>(null);
 
   // --- 既存のstate ---
-  const { unityProvider, sendMessage, isLoaded, loadingProgression } = useUnityContext({
+  const { unityProvider, sendMessage, isLoaded, loadingProgression, unload } = useUnityContext({
     loaderUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.loader.js",
     dataUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.data.br",
     frameworkUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.framework.js.br",
@@ -251,6 +251,13 @@ const RunGamePage: React.FC = () => {
       </Button>
     </div>
   );
+
+  useEffect(() => {
+    return () => {
+      // ページアンマウント時にUnityをアンロード
+      unload();
+    };
+  }, [unload]);
 
   // --- エラー時・ロード時の分岐 ---
   if (loadingGameId) {
