@@ -252,6 +252,13 @@ const RunGamePage: React.FC = () => {
     </div>
   );
 
+  useEffect(() => {
+    return () => {
+      // ページアンマウント時にUnityをアンロード
+      unload();
+    };
+  }, [unload]);
+
   // --- エラー時・ロード時の分岐 ---
   if (loadingGameId) {
     return (
