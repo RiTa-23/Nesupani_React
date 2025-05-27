@@ -10,7 +10,6 @@ import type { Results } from '@mediapipe/hands';
 import { drawCanvas } from '../utils/drawCanvas_swing.ts';
 import Button from '../components/Button.tsx';
 import PageTransition from '../components/PageTransition.tsx';
-import useSound from 'use-sound';
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { AppLoading } from "../components/AppLoading";
 import { db } from '../firebase';
@@ -43,7 +42,6 @@ const RunGamePage: React.FC = () => {
     codeUrl: "/UnityBuild/RunScene/Nesupani_Unity_Run.wasm.br",
   });
 
-  const [stepSound] = useSound('/sounds/step.mp3', { volume: 0.5 });
   const goalDistance = 80;
   const timeLimit = 30;
   const navigate = useNavigate();
@@ -111,7 +109,6 @@ const RunGamePage: React.FC = () => {
   }, [goalDistance]);
 
   const handleRun = () => {
-    stepSound(); // 足音の音を再生
     sendMessage("Player", "GameStart");
     sendMessage("Player", "SpeedUp"); // UnityのPlayerオブジェクトにメッセージを送信
   };
