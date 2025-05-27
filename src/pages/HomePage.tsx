@@ -113,19 +113,30 @@ const HomePage: React.FC = () => {
         <Modal 
           isOpen={isHowToPlayOpen} 
           onClose={() => setIsHowToPlayOpen(false)}
-          title="遊び方 (How to Play)"
+          title="遊び方 (stage1+stage2)"
         >
           <div className="space-y-4">
-            <p>ステージ１は電車が出発してしまう前にダッシュして乗り込むゲームです</p>
-            <h3 className="font-bold text-lg mt-4">ステージ１:</h3>
-            <p>夜更かし気味のこうくんはどうやら寝坊して遅刻ギリギリのようです。<br />
+            <p>ステージ１は最寄駅近くの駐車場までバイクで走るゲームです</p>
+            <p>ステージ2は電車が出発してしまう前にダッシュして乗り込むゲームです</p>
+
+            <h3 className="font-bold text-lg mt-4">ステージ1+2:</h3>
+            <p>やばい！！寝坊して遅刻ギリギリ！！！<br />
               電車の出発時刻が刻々と迫っています！<br />
-              電車が出発してしまう前に全速力でダッシュして乗り込みましょう！</p>
-            <h3 className="font-bold text-lg mt-4">ルール:</h3>
+              電車が出発してしまう前にバイクに乗って最寄駅近くの駐車場まで行き、そこからダッシュで電車に乗り込みましょう！<br /><br />
+            ※このゲームではカメラを使用するので、カメラの権限を許可してください</p>
+            <h3 className="font-bold text-lg mt-4">stage1:</h3>
             <ul className="list-disc pl-5 space-y-2">
-              <li>このゲームではカメラを使用するので、カメラの権限を許可してください</li>
+  
+              <li>カメラの前で両手を傾けることでバイクを左右移動させることができます</li>
+              <li>障害物に当たると減速、緑のゾーンに入ると加速します</li>
+              <li>バイクが転倒したらリトライボタンでやり直してください</li>
+              <li>制限時間を過ぎるとゲームオーバーになります</li>
+            </ul>
+            <h3 className="font-bold text-lg mt-4">stage2:</h3>
+            <ul className="list-disc pl-5 space-y-2">
+
               <li>カメラの前で走るように両手を振る動作をすると、降った回数に応じてキャラクターが前に進みます</li>
-              <li>出発までに間に合わないとゲームオーバーになります</li>
+              <li>制限時間を過ぎるとゲームオーバーになります</li>
             </ul>
             <p className="mt-4 font-bold">遅刻しないように急いで電車に乗り込みましょう！</p>
           </div>
