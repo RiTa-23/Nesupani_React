@@ -21,6 +21,11 @@ const RunGameClearPage: React.FC = () => {
     const gameId = localStorage.getItem("gameId");
     if (!gameId) {
       setIsFreePlay(true);
+      // フリープレイ時はlocalStorageからスコア取得
+      const freeScore = localStorage.getItem("freeplay_stage2Score");
+      if (freeScore) {
+        setScore(Number(freeScore));
+      }
       return;
     }
     const fetchScore = async () => {
@@ -58,11 +63,7 @@ const RunGameClearPage: React.FC = () => {
           <div className="text-center my-4">
             <span className="text-lg font-bold text-yellow-700">スコア：</span>
             <span className="text-2xl font-extrabold text-yellow-600">
-              {isFreePlay
-                ? "フリープレイ中"
-                : score !== null
-                  ? score
-                  : "取得中..."}
+              {score !== null ? score : "取得中..."}
             </span>
           </div>
           <div className="flex flex-col space-y-4">

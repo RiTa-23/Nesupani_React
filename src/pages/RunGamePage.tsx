@@ -192,20 +192,25 @@ const RunGamePage: React.FC = () => {
   useEffect(() => {
     const updateStage2Completed = async () => {
       if (progress >= goalDistance) {
+        const timescore = (timeLimit - timeLeft).toFixed(2);
+        const score = Math.round((45 + Number(timescore)) * 20);
+
         if (!isFreePlay) {
           const gameId = localStorage.getItem("gameId");
-          const timescore = (timeLimit - timeLeft).toFixed(2);
           if (gameId) {
             const docRef = doc(db, "gameIds", gameId);
             await import("firebase/firestore").then(({ updateDoc }) =>
               updateDoc(docRef, {
                 stage2Completed: true,
                 status: "stage2",
-                stage2Score: Math.round((45 + Number(timescore)) * 20)
+                stage2Score: score
               })
             );
-            console.log("stage2score", Math.round((45 + Number(timescore)) * 20));
+            console.log("stage2score", score);
           }
+        } else {
+          // フリープレイ時はlocalStorageに保存
+          localStorage.setItem("freeplay_stage2Score", String(score));
         }
         navigate('/rungameclear');
       }

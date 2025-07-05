@@ -101,7 +101,7 @@ const HomePage: React.FC = () => {
             <div className="text-center mb-8 animate-bounce-slow">
                 <TrainIcon size={80} className="mx-auto mb-4" />
                 <h1 className="text-5xl font-bold text-blue-600 mb-2">
-                  寝過ごしパニック
+                  寝過ごしパニック！
                 </h1>
             </div>
             

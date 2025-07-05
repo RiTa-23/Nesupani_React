@@ -153,22 +153,26 @@ function BikeGamePage() {
   useEffect(() => {
     const updateStage1Completed = async () => {
       if (progress >= goalDistance) {
+        const timescore = (timeLimit - timeLeft).toFixed(2);
+        const score = Math.round((45 + Number(timescore)) * 20);
+
         if (!isFreePlay) {
           const gameId = localStorage.getItem("gameId");
-          const timescore= (timeLimit - timeLeft).toFixed(2);
           if (gameId) {
             const docRef = doc(db, "gameIds", gameId);
             await import("firebase/firestore").then(({ updateDoc }) =>
               updateDoc(docRef, {
                 stage1Completed: true,
                 status: "stage1",
-                stage1Score: Math.round((45 + Number(timescore)) * 20)
+                stage1Score: score
               })
             );
-            console.log("stage1score", Math.round((45 + Number(timescore)) * 20));
+            console.log("stage1score", score);
           }
+        } else {
+          // フリープレイ時はlocalStorageに保存
+          localStorage.setItem("freeplay_stage1Score", String(score));
         }
-        // フリープレイでもクリア画面へ
         navigate('/bikegameclear');
       }
     };
