@@ -67,6 +67,19 @@ const HomePage: React.FC = () => {
       </div>
       <h2 className="text-2xl font-bold mb-2 text-gray-800">ゲームを開始できません</h2>
       <p className="mb-6 text-gray-600">ゲームIDが見つかりません。URLを確認してください。</p>
+      {/* フリープレイモードボタン追加 */}
+      <Button
+        onClick={() => {
+          localStorage.removeItem("gameId");
+          navigate('/bikegame');
+        }}
+        variant="primary"
+        size="large"
+        className="w-full flex items-center justify-center mt-2"
+      >
+        <Play className="mr-2" size={20} />
+        フリープレイモードで遊ぶ
+      </Button>
     </div>
   );
 
@@ -103,6 +116,19 @@ const HomePage: React.FC = () => {
               >
                 <Info className="mr-2" size={20} />
                 遊び方
+              </Button>
+              {/* フリープレイモードボタン追加 */}
+              <Button
+                onClick={() => {
+                  localStorage.removeItem("gameId");
+                  navigate('/bikegame');
+                }}
+                variant="secondary"
+                size="small"
+                className="w-full flex items-center justify-center mt-2 bg-gray-400 hover:bg-gray-500 text-white"
+              >
+                <Play className="mr-2" size={20} />
+                フリープレイモードで遊ぶ
               </Button>
             </div>
           </>
