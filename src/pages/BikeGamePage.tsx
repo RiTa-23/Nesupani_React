@@ -35,6 +35,9 @@ function BikeGamePage() {
   const [timeLeft, setTimeLeft] = useState(50);
   const [isGameStarted, setIsGameStarted] = useState(false);
 
+  // フリープレイ判定
+  const [isFreePlay, setIsFreePlay] = useState(false);
+
   // ゲームID存在チェック
   const [loadingGameId, setLoadingGameId] = useState(true);
   const [gameIdError, setGameIdError] = useState<string | null>(null);
@@ -43,7 +46,9 @@ function BikeGamePage() {
     const checkGameId = async () => {
       const gameId = localStorage.getItem("gameId");
       if (!gameId) {
-        setGameIdError("ゲームIDが見つかりません。URLを確認してください。");
+        // フリープレイモード
+        setIsFreePlay(true);
+        setGameIdError(null);
         setLoadingGameId(false);
         return;
       }
@@ -63,7 +68,6 @@ function BikeGamePage() {
         return;
       }
 
-      // stage1Completedがfalseならゲーム開始可
       setGameIdError(null);
       setLoadingGameId(false);
     };
@@ -149,24 +153,27 @@ function BikeGamePage() {
   useEffect(() => {
     const updateStage1Completed = async () => {
       if (progress >= goalDistance) {
-        const gameId = localStorage.getItem("gameId");
-        const timescore= (timeLimit - timeLeft).toFixed(2);
-        if (gameId) {
-          const docRef = doc(db, "gameIds", gameId);
-          await import("firebase/firestore").then(({ updateDoc }) =>
-            updateDoc(docRef, {
-              stage1Completed: true,
-              status: "stage1",
-              stage1Score: Math.round((45 + Number(timescore)) * 20)
-            })
-          );
-          console.log("stage1score", Math.round((45 + Number(timescore)) * 20));
+        if (!isFreePlay) {
+          const gameId = localStorage.getItem("gameId");
+          const timescore= (timeLimit - timeLeft).toFixed(2);
+          if (gameId) {
+            const docRef = doc(db, "gameIds", gameId);
+            await import("firebase/firestore").then(({ updateDoc }) =>
+              updateDoc(docRef, {
+                stage1Completed: true,
+                status: "stage1",
+                stage1Score: Math.round((45 + Number(timescore)) * 20)
+              })
+            );
+            console.log("stage1score", Math.round((45 + Number(timescore)) * 20));
+          }
         }
+        // フリープレイでもクリア画面へ
         navigate('/bikegameclear');
       }
     };
     updateStage1Completed();
-  }, [progress, navigate]);
+  }, [progress, navigate, isFreePlay, timeLeft]);
 
   // エラー時のカードUI
   const renderErrorCard = () => (
@@ -210,7 +217,7 @@ function BikeGamePage() {
       </PageTransition>
     );
   }
-  if (gameIdError) {
+  if (gameIdError && !isFreePlay) {
     return (
       <PageTransition>
         <div className="min-h-screen flex items-center justify-center bg-gray-900">

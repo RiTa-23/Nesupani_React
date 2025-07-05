@@ -12,16 +12,20 @@ const BikeGameClearPage: React.FC = () => {
   const navigate = useNavigate();
   const [playClearSound] = useSound('/sounds/clear.mp3', { volume: 0.5 });
   const [score, setScore] = useState<number | null>(null);
+  const [isFreePlay, setIsFreePlay] = useState(false);
 
   useEffect(() => {
     playClearSound();
   }, [playClearSound]);
 
-  // スコア取得
+  // フリープレイ判定とスコア取得
   useEffect(() => {
+    const gameId = localStorage.getItem("gameId");
+    if (!gameId) {
+      setIsFreePlay(true);
+      return;
+    }
     const fetchScore = async () => {
-      const gameId = localStorage.getItem("gameId");
-      if (!gameId) return;
       const docRef = doc(db, "gameIds", gameId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
@@ -56,7 +60,11 @@ const BikeGameClearPage: React.FC = () => {
           <div className="text-center my-4">
             <span className="text-lg font-bold text-yellow-700">スコア：</span>
             <span className="text-2xl font-extrabold text-yellow-600">
-              {score !== null ? score : "取得中..."}
+              {isFreePlay
+                ? "フリープレイ中"
+                : score !== null
+                  ? score
+                  : "取得中..."}
             </span>
           </div>
           <div className="flex flex-col space-y-4">

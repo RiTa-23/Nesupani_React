@@ -16,6 +16,7 @@ const HomePage: React.FC = () => {
   const [inputId, setInputId] = useState<string | null>(null);
   const [idExists, setIdExists] = useState(false);
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
+  const [showErrorCard, setShowErrorCard] = useState(false); // ★追加
 
   // URLからidを取得し、Firestoreで存在チェック
   useEffect(() => {
@@ -27,8 +28,11 @@ const HomePage: React.FC = () => {
     }
     setInputId(id);
 
+    // 初期表示時はエラーを出さない
+    setError('');
+    setShowErrorCard(false);
+
     if (!id) {
-      setError('IDが見つかりません');
       setLoading(false);
       return;
     }
@@ -40,7 +44,6 @@ const HomePage: React.FC = () => {
         setIdExists(true);
         setError('');
       } else {
-        setError('IDが見つかりません');
         setIdExists(false);
       }
       setLoading(false);
@@ -51,7 +54,11 @@ const HomePage: React.FC = () => {
 
   // スタートボタン押下時の処理
   const handleStartGame = async () => {
-    if (!inputId || !idExists) return;
+    if (!inputId || !idExists) {
+      setError('IDが見つかりません');
+      setShowErrorCard(true); // ★ここでエラーカード表示
+      return;
+    }
     localStorage.setItem("gameId", inputId);
     navigate('/bikegame');
   };
@@ -67,7 +74,6 @@ const HomePage: React.FC = () => {
       </div>
       <h2 className="text-2xl font-bold mb-2 text-gray-800">ゲームを開始できません</h2>
       <p className="mb-6 text-gray-600">ゲームIDが見つかりません。URLを確認してください。</p>
-      {/* フリープレイモードボタン追加 */}
       <Button
         onClick={() => {
           localStorage.removeItem("gameId");
@@ -88,7 +94,7 @@ const HomePage: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex flex-col items-center justify-center p-4">
         {loading ? (
           <div>読み込み中...</div>
-        ) : error ? (
+        ) : showErrorCard ? ( // ★ここでエラーカードを制御
           renderErrorCard()
         ) : (
           <>
@@ -117,13 +123,12 @@ const HomePage: React.FC = () => {
                 <Info className="mr-2" size={20} />
                 遊び方
               </Button>
-              {/* フリープレイモードボタン追加 */}
               <Button
                 onClick={() => {
                   localStorage.removeItem("gameId");
                   navigate('/bikegame');
                 }}
-                variant="secondary"
+                variant="primary"
                 size="small"
                 className="w-full flex items-center justify-center mt-2 bg-gray-400 hover:bg-gray-500 text-white"
               >
