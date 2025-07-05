@@ -16,6 +16,7 @@ const HomePage: React.FC = () => {
   const [inputId, setInputId] = useState<string | null>(null);
   const [idExists, setIdExists] = useState(false);
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
+  const [showErrorCard, setShowErrorCard] = useState(false); // ★追加
 
   // URLからidを取得し、Firestoreで存在チェック
   useEffect(() => {
@@ -27,8 +28,11 @@ const HomePage: React.FC = () => {
     }
     setInputId(id);
 
+    // 初期表示時はエラーを出さない
+    setError('');
+    setShowErrorCard(false);
+
     if (!id) {
-      setError('IDが見つかりません');
       setLoading(false);
       return;
     }
@@ -40,7 +44,6 @@ const HomePage: React.FC = () => {
         setIdExists(true);
         setError('');
       } else {
-        setError('IDが見つかりません');
         setIdExists(false);
       }
       setLoading(false);
@@ -51,7 +54,11 @@ const HomePage: React.FC = () => {
 
   // スタートボタン押下時の処理
   const handleStartGame = async () => {
-    if (!inputId || !idExists) return;
+    if (!inputId || !idExists) {
+      setError('IDが見つかりません');
+      setShowErrorCard(true); // ★ここでエラーカード表示
+      return;
+    }
     localStorage.setItem("gameId", inputId);
     navigate('/bikegame');
   };
@@ -67,6 +74,18 @@ const HomePage: React.FC = () => {
       </div>
       <h2 className="text-2xl font-bold mb-2 text-gray-800">ゲームを開始できません</h2>
       <p className="mb-6 text-gray-600">ゲームIDが見つかりません。URLを確認してください。</p>
+      <Button
+        onClick={() => {
+          localStorage.removeItem("gameId");
+          navigate('/bikegame');
+        }}
+        variant="primary"
+        size="large"
+        className="w-full flex items-center justify-center mt-2"
+      >
+        <Play className="mr-2" size={20} />
+        フリープレイモードで遊ぶ
+      </Button>
     </div>
   );
 
@@ -75,14 +94,14 @@ const HomePage: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex flex-col items-center justify-center p-4">
         {loading ? (
           <div>読み込み中...</div>
-        ) : error ? (
+        ) : showErrorCard ? ( // ★ここでエラーカードを制御
           renderErrorCard()
         ) : (
           <>
             <div className="text-center mb-8 animate-bounce-slow">
                 <TrainIcon size={80} className="mx-auto mb-4" />
                 <h1 className="text-5xl font-bold text-blue-600 mb-2">
-                  寝過ごしパニック
+                  寝過ごしパニック！
                 </h1>
             </div>
             
@@ -104,6 +123,18 @@ const HomePage: React.FC = () => {
                 <Info className="mr-2" size={20} />
                 遊び方
               </Button>
+              <Button
+                onClick={() => {
+                  localStorage.removeItem("gameId");
+                  navigate('/bikegame');
+                }}
+                variant="primary"
+                size="small"
+                className="w-full flex items-center justify-center mt-2 bg-gray-400 hover:bg-gray-500 text-white"
+              >
+                <Play className="mr-2" size={20} />
+                フリープレイモードで遊ぶ
+              </Button>
             </div>
           </>
         )}
@@ -119,7 +150,7 @@ const HomePage: React.FC = () => {
             <p>ステージ１は最寄駅近くの駐車場までバイクで走るゲームです</p>
             <p>ステージ2は電車が出発してしまう前にダッシュして乗り込むゲームです</p>
 
-            <h3 className="font-bold text-lg mt-4">ステージ1+2:</h3>
+            <h3 className="font-bold text-lg mt-4">シチュエーション:</h3>
             <p>やばい！！寝坊して遅刻ギリギリ！！！<br />
               電車の出発時刻が刻々と迫っています！<br />
               電車が出発してしまう前にバイクに乗って最寄駅近くの駐車場まで行き、そこからダッシュで電車に乗り込みましょう！<br /><br />
@@ -135,7 +166,8 @@ const HomePage: React.FC = () => {
             <h3 className="font-bold text-lg mt-4">stage2:</h3>
             <ul className="list-disc pl-5 space-y-2">
 
-              <li>カメラの前で走るように両手を振る動作をすると、降った回数に応じてキャラクターが前に進みます</li>
+              <li>カメラの前で両手を上下に交差させて振る動作をすると、キャラクターが加速します</li>
+              <li>両手を上げるとジャンプします</li>
               <li>制限時間を過ぎるとゲームオーバーになります</li>
             </ul>
             <p className="mt-4 font-bold">遅刻しないように急いで電車に乗り込みましょう！</p>

@@ -30,7 +30,8 @@ declare global {
 }
 
 const RunGamePage: React.FC = () => {
-  // 追加: ゲームID存在チェック用
+  // フリープレイ判定
+  const [isFreePlay, setIsFreePlay] = useState(false);
   const [loadingGameId, setLoadingGameId] = useState(true);
   const [gameIdError, setGameIdError] = useState<string | null>(null);
 
@@ -56,12 +57,13 @@ const RunGamePage: React.FC = () => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // --- 追加: ゲームID存在チェック ---
+  // --- ゲームID存在チェック ---
   useEffect(() => {
     const checkGameId = async () => {
       const gameId = localStorage.getItem("gameId");
       if (!gameId) {
-        setGameIdError("ゲームIDが見つかりません。URLを確認してください。");
+        setIsFreePlay(true);
+        setGameIdError(null);
         setLoadingGameId(false);
         return;
       }
@@ -78,7 +80,6 @@ const RunGamePage: React.FC = () => {
         setLoadingGameId(false);
         return;
       }
-      // stage2Completedがfalseならゲーム開始可
       setGameIdError(null);
       setLoadingGameId(false);
     };
@@ -191,24 +192,31 @@ const RunGamePage: React.FC = () => {
   useEffect(() => {
     const updateStage2Completed = async () => {
       if (progress >= goalDistance) {
-        const gameId = localStorage.getItem("gameId");
         const timescore = (timeLimit - timeLeft).toFixed(2);
-        if (gameId) {
-          const docRef = doc(db, "gameIds", gameId);
-          await import("firebase/firestore").then(({ updateDoc }) =>
-            updateDoc(docRef, {
-              stage2Completed: true,
-              status: "stage2",
-              stage2Score: Math.round((45 + Number(timescore)) * 20)
-            })
-          );
-          console.log("stage2score", Math.round((45 + Number(timescore)) * 20));
+        const score = Math.round((45 + Number(timescore)) * 20);
+
+        if (!isFreePlay) {
+          const gameId = localStorage.getItem("gameId");
+          if (gameId) {
+            const docRef = doc(db, "gameIds", gameId);
+            await import("firebase/firestore").then(({ updateDoc }) =>
+              updateDoc(docRef, {
+                stage2Completed: true,
+                status: "stage2",
+                stage2Score: score
+              })
+            );
+            console.log("stage2score", score);
+          }
+        } else {
+          // フリープレイ時はlocalStorageに保存
+          localStorage.setItem("freeplay_stage2Score", String(score));
         }
         navigate('/rungameclear');
       }
     };
     updateStage2Completed();
-  }, [progress, goalDistance, navigate, timeLeft, timeLimit]);
+  }, [progress, goalDistance, navigate, timeLeft, timeLimit, isFreePlay]);
 
   // デバッグ用：progressの変更を確認
   useEffect(() => {
@@ -266,7 +274,7 @@ const RunGamePage: React.FC = () => {
       </PageTransition>
     );
   }
-  if (gameIdError) {
+  if (gameIdError && !isFreePlay) {
     return (
       <PageTransition>
         <div className="min-h-screen flex items-center justify-center bg-gray-900">

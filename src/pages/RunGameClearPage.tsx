@@ -10,16 +10,25 @@ import { doc, getDoc } from "firebase/firestore";
 const RunGameClearPage: React.FC = () => {
   const [playClearSound] = useSound('/sounds/clear.mp3', { volume: 0.5 });
   const [score, setScore] = useState<number | null>(null);
+  const [isFreePlay, setIsFreePlay] = useState(false);
 
   useEffect(() => {
     playClearSound();
   }, [playClearSound]);
 
-  // スコア取得
+  // フリープレイ判定とスコア取得
   useEffect(() => {
+    const gameId = localStorage.getItem("gameId");
+    if (!gameId) {
+      setIsFreePlay(true);
+      // フリープレイ時はlocalStorageからスコア取得
+      const freeScore = localStorage.getItem("freeplay_stage2Score");
+      if (freeScore) {
+        setScore(Number(freeScore));
+      }
+      return;
+    }
     const fetchScore = async () => {
-      const gameId = localStorage.getItem("gameId");
-      if (!gameId) return;
       const docRef = doc(db, "gameIds", gameId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
